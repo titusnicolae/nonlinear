@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <vector>
+
 using namespace std;
 class node
 { bool isoperator;  //if it is a variable, or it's an operator 
@@ -11,6 +12,7 @@ class node
   node(bool isoperator, char *s)
   { this->isoperator=isoperator;
     this->s=s;
+    this->parent=NULL;
   }
 
   void addChild(node *p)
@@ -55,28 +57,33 @@ class node
   }
   static int priority(node *n)
   { if (n==NULL)
-      return -1;
-    if(!n->isoperator) 
       return 0;
-    if(strcmp(n->s,"+")==0 || strcmp(n->s,"-")==0)
-      return 1; 
-    if(strcmp(n->s,"*")==0 || strcmp(n->s,"/")==0)
-      return 2;
-    return 3;
+    if(n->isoperator) 
+    { if(!strcmp(n->s,"+") || !strcmp(n->s,"-"))
+        return 1; 
+      if(!strcmp(n->s,"*") || !strcmp(n->s,"/"))
+        return 2;
+      if(!strcmp(n->s,"^"))
+        return 3;
+      if(!strcmp(n->s,"Sin") || !strcmp(n->s,"Cos") || !strcmp(n->s,"Abs"))
+        return 4;
+    }
+    else 
+      return 5;
   }
   char* gets()
   { return s;
   }
 };
 
-/*
-void process(char& *c)
+
+void process(char* &c)
 { node *p=NULL;
- 
+  char s1,s2;
   while(c!=NULL)
   { 
     if(*c=='(' || *c=='[')
-    {
+    { 
     }
     else if(*c==')' || *c==']')
     {
@@ -99,33 +106,31 @@ void process(char& *c)
     else if(*c>='A' && *c<='Z')
     {
     }
-    else if(*c>='a' && *c<='z')
-    { char str[10];int i=0; 
-      while(*c>='a' && *c<='z')
-        str[i++]=*(c++);
-      str[i]=0;
-      node *e=new node(true,NULL,strdup(str),NULL);
-      if (p!=NULL)
-      { 
-        
-      }  
+    else if((*c>=(s1='a') && *c<=(s2='z'))||(*c>=(s1='0') && *c<=(s2='9')))
+    { for (char *t=c; *t>=s1 && *t<=s2;t++);
+      char *s=new char[t-c+1];
+      strncpy(s,c,t-c);
+      s[t-c]=0;
+      node *o=new node(false,s);
+      ///
+      if(p!=NULL)
+        p.addChild(o);  
+      else
+        p=o;
     }
     else
-    {  
+    { 
     }
   }
+  if(p!=NULL)
+  { for (
+     
+  } 
   return r;
 }
-*/
 
-int main ()
-{ 
-   
-  char *line;
-  FILE *fin=fopen("math.in","r");
-  line=new char[140000];  
-  fgets(line,140000,fin);
-  node *a,*b,*c,*d,*e,*f;
+void test()
+{ node *a,*b,*c,*d,*e,*f;
   a=new node(true,strdup("Cos"));
   b=new node(false,strdup("u"));
   c=new node(true,strdup("+"));
@@ -139,14 +144,20 @@ int main ()
   e->addChild(f);
   e->print(); 
   printf("\n");
-  /*
+}
+
+int main ()
+{ char *line,*c;
+  FILE *fin=fopen("math.in","r");
+  line=new char[140000];  
+  fgets(line,140000,fin);
   node *n[6];
-  for (int i=0;i<6;i++)
+  for (int i=0;i<1;i++)
   { c=strtok(line,"\n");
     while(c!=NULL)
     { printf("%s",c);
-      //n[i]=process(c);
+      n[i]=process(c);
     } 
-  }*/
+  }
   return 0;
 }
