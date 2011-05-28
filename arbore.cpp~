@@ -1,4 +1,4 @@
-#include <string.h>
+->#include <string.h>
 #include <stdio.h>
 #include <vector>
 
@@ -23,41 +23,41 @@ public:
     this->minus=minus;
     this->inverse=inverse;
   }
-  
-  void print()
-  { char* func;
 
+  void print()
+  {
     if(this->isOperator)
     {  
-      if(this->isOperator)
-      { vector<node*>::const_iterator it=this->list.begin();
+      char *paren[2]={strdup(""),strdup("")};
+
+        if(node::priority(this->parent)>node::priority(this))
+        { paren[0]=strdup("(");
+          paren[1]=strdup(")"); 
+        }
+        printf("%s",paren[0]);    
+       
+        vector<node*>::const_iterator it=this->list.begin();
         ((node*)(*it))->print(); 
         for (++it;it!=this->list.end();++it)
-        { if(node::priority(this)==1)
-          { printf("%c",this->minus?'-':'+');
-          }
-          else if(node::priority(this)==2)
-          { printf("%c",this->inverse?'*':'/');
-          }
-          else
-          { printf("%s",this->s);
-          } 
+        { printf("%s",this->s);
           ((node*)(*it))->print();  
         }
-      }
-      else
-      { if(!strcmp(func="Cos",this->s) || !strcmp(func="Sin",this->s) || !strcmp(func="Abs",this->s))
-        { printf("%s[",func);
-          this->list[0]->print();
-          printf("]");
-        }
-        else
-        { 
-        }
+        printf("%s",paren[1]);
       }
     }
     else
-    { printf("%s",this->s);
+    { if(this->list.size()==1)
+      { char *paren[2]={strdup(""),strdup("")};
+
+        if(!strcmp("Cos",this->s) || !strcmp("Sin",this->s) || !strcmp("Abs",this->s))
+        { paren[0]=strdup("[");
+          paren[1]=strdup("]");  
+        } 
+        printf("%s%s",this->s,paren[0]);
+        this->list[0]->print();
+        printf("%s",paren[1]);
+      } 
+      printf("%s",this->s);
     }
   }
   
