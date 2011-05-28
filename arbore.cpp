@@ -15,17 +15,13 @@ public:
   bool minus;
   bool inverse;
 
+
   node(bool isOperator, char *s,bool minus=false,bool inverse=false)
   { this->isOperator=isOperator;
     this->s=s;
     this->parent=NULL;
     this->minus=minus;
     this->inverse=inverse;
-  }
-
-  void addChild(node *p)
-  { this->list.push_back(p);
-    p->parent=this;
   }
 
   void print()
@@ -86,7 +82,12 @@ public:
   { return s;
   }
 
-  bool getParent()
+  void addChild(node *p)
+  { this->list.push_back(p);
+    p->parent=this;
+  }
+
+ bool getParent()
   { return this->parent;
   }
 
@@ -99,8 +100,11 @@ public:
   { this->minus^=t->getSign();
     t->setSign(false);
   }
-  void setSign(bool flag)
-  { this->minus=flag;
+  void updateSign(bool flag)
+  { this->minus^=flag;
+  }
+  void updateInverse(bool flag)
+  { this->inverse=flag;
   }
   bool getSign()
   { return this->minus;
@@ -110,8 +114,7 @@ public:
   }
 };
 
-
-node* process(char* &c,bool coa)
+node* process(char* &c)
 { 
   node *p=NULL;//last operator or first operand
   char s1,s2,*func;
@@ -121,10 +124,14 @@ node* process(char* &c,bool coa)
 
   while(c!=NULL)
   { 
-    if(*c=='(' || *c=='[')
+    if(*c=='(')
     { wasoperand=true;
       c++;
       node* r=process(c);
+      r.updateSign(wasminus);
+      r.updateInverse(wasinverse); 
+      ///
+      wasminus=wasinverse=false;
     }
     else if(*c==')' || *c==']')
     {
@@ -132,39 +139,54 @@ node* process(char* &c,bool coa)
       node *u=p;
       while(u->hasParent())
       { u=u->getParent();   
-      } 
+      }
+      return u; 
     }
     else if(*c=='+'||*c=='-')
-    { 
-      { 
-        node *o=new node(true,strdup("+"));
-        if(node::priority(p)==node::priority(o))//daca este sir de +-+-
-        { c++; 
+    { c++; 
+      if(wasoperand)
+      { node *o=new node(true,strdup("+"));
+        if(p->isOperand())
+        { 
+          o.addChild(p); 
+          o.updateSign(p);
+          p=o;
         }
-        else //daca + trebuie pus deasupra de * sau ^
-        { node *u=p;
-          while(node::priority(o)<node::priority(u))
-          { u=u->getParent();
+        else
+        { 
+          if(node::priority(p)==node::priority(o))//daca este sir de +-+-
+          { 
           }
-          if(node::priority(u)==node::priority(o))//era un + inainte de sirul ala de *
-          { p=u;
-            c++;
-          }
-          else//trebuie pus un + deasupra de * 
-          { o.addChild(u); 
-            o.updateSign(u); 
-            p=o;
+          else //daca + trebuie pus deasupra de * sau ^
+          { node *u=p;
+            while(node::priority(o)<node::priority(u))
+            { u=u->getParent();
+            }
+            if(node::priority(u)==node::priority(o))//era un + inainte de sirul ala de *
+            { p=u;
+            }
+            else//trebuie pus un + deasupra de * 
+            { o.addChild(u); 
+              o.updateSign(u); 
+              p=o;
+            }
           }
         }
       }
-      wasoperand=false;//trebuie la sfarsit neaparat!!
+      else 
+      { wasminus=(*c=='-'); 
+      } 
+      wasoperand=false; //trebuie la sfarsit neaparat!!
     }
     else if(*c==' '||*c=='/')
-    { 
+    { c++;
       wasoperand=false; 
+      if(*c=='/')
+        wasinverse=true;
       //creaza nod '*'
       if(p==NULL) printf("hopa penelopa");
       node *o=new node(true,strdup("*"));
+
       if(p->isOperand())
       { o.addChild(p);
         o.updateSign(p);
@@ -172,13 +194,13 @@ node* process(char* &c,bool coa)
       }
       else
       { if(node::priority(p)==node::priority(o))//e un sir de * 
-        { c++; 
+        { 
         }
         else if(node::priority(p)>node::priority(o)) //* trebuie pus deasupra de ^ si poate dedesubt de + 
         {   
           node *u=p;
-          while(node::priority(u)>node::priority(o)&&u->hasParent())//urca de jos in sus pana ajunge la * sau sub *
-          { u=u->getParent();                    
+          while(u->hasParent()&&node::priority(u->hasParent())>=node::priority(o))//urca de jos in sus pana ajunge la * sau sub *
+          { u=u->getParent();
           }
           if (node::priority(u)==node::priority(o))//daca a ajuns la * dupa ce a urcat
           { p=u;
@@ -191,10 +213,9 @@ node* process(char* &c,bool coa)
               h.addChild(o);
             }
             o.addChild(u); //* adauga pe ^ ca fiu
-            o.updateSign(u); 
+            o.updateSign(u); //(no inverse) 
             p=o;
           }  
-          c++; 
         }
         else //trebuie pus * sub + si furat de la + un termen
         { node *t=p->list.back();
@@ -203,12 +224,37 @@ node* process(char* &c,bool coa)
           o.addChild(t);
           o.updateSign(t);
           p=o;
-          c++;
         }
       }
     }
     else if(*c=='^')
-    { wasoperand=false; 
+    { wasoperand=false;
+      c++;
+
+      node *o=new node(true,strdup("^"));
+      if(p->isOperand())
+      { o->addChild(p);
+        o->updateSign(p);
+        p=o;  
+      }
+      else
+      { if(node::priority(p)<=3) // a+b^2 a*b^2 a^2^2
+        { 
+          node *t=p->list.back();
+          p->list.pop_back();
+          p.addChild(o);
+          o.addChild(t);
+          node* u=t;
+          while(u->hasParent()&&node::priority(u->getParent())>=2)
+          { u=u->getParent();
+          }
+          u.updateSign(o);    
+        }
+        else //cos(u) ^2
+        {  
+          
+        }
+      }
     }
     else if((*c>=(s1='a') && *c<=(s2='z'))||(*c>=(s1='0') && *c<=(s2='9')))
     { 
@@ -219,17 +265,39 @@ node* process(char* &c,bool coa)
       strncpy(s,c,t-c);
       s[t-c]=0; //pune NULL la sfarsitul string-ului
       c=t;
-      node *o=new node(false,s,wasminus,wasinverse);//nu e operator, baga sirul
-      wasminus=wasinverse=false;
+      //////
+      node *o=new node(false,s,wasminus,wasinverse);
+
       if (p==NULL)
       { p=o;
       }    
       else
       { p.addChild(o);
+        if(node::priority(p)==2)
+        { p->updateSign(u);
+        }
       }
+      //////
+      wasminus=wasinverse=false;
     }
-    else if(!strncmp((func="Sin"),p,4) || !strncmp((func="Cos"),p,3) || !strncmp((func="Abs"),p,3))
-    { wasoperand=true; 
+    else if(!strncmp((func="Sin["),p,4) || !strncmp((func="Cos["),p,4) || !strncmp((func="Abs["),p,4))
+    { 
+      wasoperand=true;
+      c+=strlen(func);
+      node *o=new node(false,strdup(func),wasminus,wasinverse);
+      node *r=process(c);
+      o.addChild(r); 
+         
+      if(p!=NULL)
+      { p.addChild(o);
+        if(node::priority(p)==2)
+        { p.updateSign(u);  
+        }         
+      }
+      else
+      { p=o;  
+      }
+      wasminus=wasinverse=false; 
     }
     else
     { printf("%c wtf is this shit",*c);
