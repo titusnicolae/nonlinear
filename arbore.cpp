@@ -24,40 +24,51 @@ public:
     this->inverse=inverse;
   }
   
-  void print()
+  void print(bool first)
   { char* func;
+    char cos[]="Cos[",sin[]="Sin[",abs[]="Abs[";
 
     if(this->isOperator)
-    {  
-      if(this->isOperator)
-      { vector<node*>::const_iterator it=this->list.begin();
-        ((node*)(*it))->print(); 
-        for (++it;it!=this->list.end();++it)
-        { if(node::priority(this)==1)
-          { printf("%c",this->minus?'-':'+');
-          }
-          else if(node::priority(this)==2)
-          { printf("%c",this->inverse?'*':'/');
-          }
-          else
-          { printf("%s",this->s);
-          } 
-          ((node*)(*it))->print();  
+    { vector<node*>::const_iterator it=this->list.begin();
+      if(node::priority(this)==1)
+      { for (;it!=this->list.end();++it)
+        { (*it)->print(it==this->list.begin());
         }
       }
-      else
-      { if(!strcmp(func="Cos",this->s) || !strcmp(func="Sin",this->s) || !strcmp(func="Abs",this->s))
-        { printf("%s[",func);
-          this->list[0]->print();
-          printf("]");
+      else if(node::priority(this)==2)
+      { printf("%s",this->minus?"-":(first?"":"+"));
+        this->list[0]->print(true);
+        for (++it;it!=this->list.end();++it)
+        { if(node::priority(this)==2)
+          { printf("%c",(*it)->inverse?'/':'*');
+          }
+          (*it)->print(true);  
         }
-        else
-        { 
-        }
+      }
+      else if(node::priority(this)==3)
+      { 
+        this->list[0]->print(first);
+        printf("^");
+        this->list[1]->print(true);
       }
     }
     else
-    { printf("%s",this->s);
+    { if(!strcmp(func=cos,this->s) || !strcmp(func=sin,this->s) || !strcmp(func=abs,this->s))
+      { 
+        printf("%s",this->minus?"-":(first?"":"+"));
+        printf("%s",func);
+        this->list[0]->print(first);
+        printf("]");
+      }
+      else if(!strcmp("(",this->s))
+      { 
+        printf("%s(",this->minus?"-":(first?"":"+"));
+        this->list[0]->print(first);
+        printf(")");
+      }
+      else
+      { printf("%s%s",this->minus?"-":(first?"":"+"),this->s);
+      }
     }
   }
   
@@ -77,7 +88,7 @@ public:
     else 
       return 5;
   }
-
+  
   char* gets()
   { return s;
   }
@@ -87,18 +98,18 @@ public:
     p->parent=this;
   }
 
- bool getParent()
+  node* getParent()
   { return this->parent;
   }
 
   bool hasParent()
-  { if(this->p==NULL)
+  { if(this->parent==NULL)
       return false;
     return true;
   }
   void updateSign(node *t)
   { this->minus^=t->getSign();
-    t->setSign(false);
+    t->minus=false;
   }
   void updateSign(bool flag)
   { this->minus^=flag;
@@ -121,22 +132,27 @@ node* process(char* &c)
   bool wasminus=false;//todo dezactivare
   bool wasinverse=false;//la fel
   bool wasoperand=false;//daca ultima chestia a fost un operand
-
-  while(c!=NULL)
+  char cos[]="Cos[",sin[]="Sin[",abs[]="Abs[";
+  while(*c!='\0')
   { 
     if(*c=='(')
     { wasoperand=true;
       c++;
+      node *o=new node(false,strdup("("),wasminus,wasinverse);
+   
+
+      printf("**%c%s\n",wasminus?'-':'+',"(");
+
+ 
       node* r=process(c);
-      r->updateSign(wasminus);
-      r->updateInverse(wasinverse);
+      o->addChild(r);
       if(p==NULL)
-      { p=r;
+      { p=o;
       }
       else
-      { p->addChild(r);
+      { p->addChild(o);
         if(node::priority(p)==2)
-          p->updateSign(r);
+          p->updateSign(o);
       } 
       wasminus=wasinverse=false;
     }
@@ -150,14 +166,13 @@ node* process(char* &c)
       return u; 
     }
     else if(*c=='+'||*c=='-')
-    { c++;
-      wasminus=(*c=='-');
+    { wasminus=(*c=='-');
+      c++;
       if(wasoperand)
       { node *o=new node(true,strdup("+"));
         if(p->isOperand())
         { 
           o->addChild(p); 
-          o->updateSign(p);
           p=o;
         }
         else
@@ -182,9 +197,9 @@ node* process(char* &c)
       }
       wasoperand=false; //trebuie la sfarsit neaparat!!
     }
-    else if(*c==' '||*c=='/')
-    { c++;
-      wasinverse=(*c=='/');
+    else if(*c==' '||*c=='*'||*c=='/')
+    { wasinverse=(*c=='/');
+      c++;
       //creaza nod '*'
       if(p==NULL) printf("hopa penelopa");
       node *o=new node(true,strdup("*"));
@@ -201,7 +216,7 @@ node* process(char* &c)
         else if(node::priority(p)>node::priority(o)) //* trebuie pus deasupra de ^ si poate dedesubt de + 
         {   
           node *u=p;
-          while(u->hasParent()&&node::priority(u->hasParent())>=node::priority(o))//urca de jos in sus pana ajunge la * sau sub *
+          while(u->hasParent()&&node::priority(u->getParent())>=node::priority(o))//urca de jos in sus pana ajunge la * sau sub *
           { u=u->getParent();
           }
           if (node::priority(u)==node::priority(o))//daca a ajuns la * dupa ce a urcat
@@ -220,7 +235,8 @@ node* process(char* &c)
           }  
         }
         else //trebuie pus * sub + si furat de la + un termen
-        { node *t=p->list.back();
+        { 
+          node *t=p->list.back();
           p->list.pop_back();
           p->addChild(o); 
           o->addChild(t);
@@ -254,6 +270,7 @@ node* process(char* &c)
       for (t=c; *t>=s1 && *t<=s2;t++);
       char *s=new char[t-c+1]; //+1 pentru NULL
       strncpy(s,c,t-c);
+      printf("**%c%s\n",wasminus?'-':'+',s);
       s[t-c]=0; //pune NULL la sfarsitul string-ului
       c=t;
       //////
@@ -265,7 +282,7 @@ node* process(char* &c)
       else
       { p->addChild(o);
         if(node::priority(p)==2)
-        { p->updateSign(u);
+        { p->updateSign(o);
         }
       }
       //////
@@ -273,7 +290,7 @@ node* process(char* &c)
       wasoperand=true; 
       wasminus=wasinverse=false;
     }
-    else if(!strncmp((func="Sin["),p,4) || !strncmp((func="Cos["),p,4) || !strncmp((func="Abs["),p,4))
+    else if(!strncmp((func=sin),c,4) || !strncmp((func=cos),c,4) || !strncmp((func=abs),c,4))
     { 
       c+=strlen(func);
       node *o=new node(false,strdup(func),wasminus,wasinverse);
@@ -283,7 +300,7 @@ node* process(char* &c)
       if(p!=NULL)
       { p->addChild(o);
         if(node::priority(p)==2)
-        { p->updateSign(u);  
+        { p->updateSign(o);  
         }         
       }
       else
@@ -293,10 +310,16 @@ node* process(char* &c)
       wasminus=wasinverse=false; 
     }
     else
-    { printf("%c wtf is this shit",*c);
+    { printf("%d%c wtf is this shit",*c,*c);
+      return p;
     }
   }
-  return p;
+ 
+  node *u=p;
+  while(u->hasParent())
+  { u=u->getParent();   
+  }
+  return u; 
 }
 
 void test()
@@ -312,24 +335,27 @@ void test()
   c->addChild(d);
   e->addChild(c);
   e->addChild(f);
-  e->print(); 
+  e->print(true); 
   printf("\n");
 }
 
 int main ()
 { char *line,*c;
+  char *aux;
   FILE *fin=fopen("math2.in","r");
   line=new char[140000];  
-  fgets(line,140000,fin);
+  fread(line,140000,1,fin);
+  int i=0;
   node *n[6];
-  for (int i=0;i<1;i++)
-  { c=strtok(line,"\n");
-    while(c!=NULL)
-    { printf("%s",c);
-      n[i]=process(c);
-      c=strtok(NULL,"\n");
-    } 
+  c=strtok(line,"\n");
+  while(c!=NULL)
+  { 
+    printf("%s\n",c);
+    aux=c;
+    n[i]=process(aux);
+    n[i++]->print(true);
+    printf("\n\n");
+    c=strtok(NULL,"\n");
   }
   return 0;
 }
-
