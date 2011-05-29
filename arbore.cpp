@@ -1,8 +1,44 @@
 #include <string.h>
 #include <stdio.h>
 #include <vector>
-
+#include <math.h>
+char *beg;
+int i;
 using namespace std;
+bool isNumber(char *s)
+{ for (char *c=s;*c!=0;c++)
+  { if(*c<'0' || *c > '9')
+      return false;
+  }
+  return true;
+}
+
+int toNumber(char *s)
+{ int r=0;
+  for (char *c=s;*c!=0;c++)
+  { r=r*10+(*c-'0');
+  }
+  return r;
+} 
+
+class dict 
+{ vector<char*> keys;
+  vector<double> values;
+public: 
+  dict() {}
+  void add(char *key,double value)
+  { this->keys.push_back(key);
+    this->values.push_back(value);
+  }
+  double get(char *key)
+  { for (int i=0;i<this->keys.size();++i)
+    { if(!strcmp(this->keys[i],key))
+      { return this->values[i]; 
+      }
+    }
+  }
+};
+
 class node
 {
 private:
@@ -23,13 +59,57 @@ public:
     this->minus=minus;
     this->inverse=inverse;
   }
-  
+
+  double evaluate()
+  { char* func;
+    char Cos[]="Cos[",Sin[]="Sin[",Abs[]="Abs[";
+    float ret;
+    if(this->isOperator)
+    { vector<node*>::iterator it=this->list.begin();
+      if(node::priority(this)==1)
+      { ret=0;  
+        for (;it!=this->list.end();++it)
+        { ret+=(*it)->evaluate();
+        }
+      }
+      else if(node::priority(this)==2)
+      { ret=this->list[0]->evaluate();
+        for (++it;it!=this->list.end();++it)
+        { ret*=(*it)->evaluate();
+        }
+      }
+      else if(node::priority(this)==3)
+      { return pow(this->list[0]->evaluate(),this->list[1]->evaluate()); 
+      }
+    }
+    else
+    { if(!strcmp(func=Cos,this->s))
+      { ret=cos(this->list[0]->evaluate()); 
+      }
+      else if(!strcmp(func=Sin,this->s))
+      { ret=sin(this->list[0]->evaluate()); 
+      }
+      else if(!strcmp(func=Abs,this->s))
+      { ret=fabs(this->list[0]->evaluate()); 
+      }
+      else if(!strcmp("(",this->s))
+      { ret=this->list[0]->evaluate();
+      }
+      else
+      { ret=1;
+          
+        /* todo */
+      } 
+       
+    }
+    return ret;
+  }  
   void print(bool first)
   { char* func;
     char cos[]="Cos[",sin[]="Sin[",abs[]="Abs[";
 
     if(this->isOperator)
-    { vector<node*>::const_iterator it=this->list.begin();
+    { vector<node*>::iterator it=this->list.begin();
       if(node::priority(this)==1)
       { for (;it!=this->list.end();++it)
         { (*it)->print(it==this->list.begin());
@@ -40,7 +120,7 @@ public:
         this->list[0]->print(true);
         for (++it;it!=this->list.end();++it)
         { if(node::priority(this)==2)
-          { printf("%c",(*it)->inverse?'/':'*');
+          { printf("%c",(*it)->inverse?'/':' ');
           }
           (*it)->print(true);  
         }
@@ -133,7 +213,7 @@ node* process(char* &c)
   bool wasinverse=false;//la fel
   bool wasoperand=false;//daca ultima chestia a fost un operand
   char cos[]="Cos[",sin[]="Sin[",abs[]="Abs[";
-  while(*c!='\0')
+  while(*c!=0&&*c!=13)
   { 
     if(*c=='(')
     { wasoperand=true;
@@ -141,7 +221,7 @@ node* process(char* &c)
       node *o=new node(false,strdup("("),wasminus,wasinverse);
    
 
-      printf("**%c%s\n",wasminus?'-':'+',"(");
+      //printf("%d|%d**%c%s\n",i,c-beg,wasminus?'-':'+',"(");
 
  
       node* r=process(c);
@@ -270,7 +350,7 @@ node* process(char* &c)
       for (t=c; *t>=s1 && *t<=s2;t++);
       char *s=new char[t-c+1]; //+1 pentru NULL
       strncpy(s,c,t-c);
-      printf("**%c%s\n",wasminus?'-':'+',s);
+      //printf("**%c%s\n",wasminus?'-':'+',s);
       s[t-c]=0; //pune NULL la sfarsitul string-ului
       c=t;
       //////
@@ -342,20 +422,34 @@ void test()
 int main ()
 { char *line,*c;
   char *aux;
-  FILE *fin=fopen("math2.in","r");
+  FILE *fin=fopen("math.in","r");
+  dict *d=new dict();
+  d->add(strdup("a"),1);
+  d->add(strdup("b"),2);
+  d->add(strdup("c"),3);
+  d->add(strdup("f"),4);
+  d->add(strdup("g"),5);
+  d->add(strdup("h"),6);
+  d->add(strdup("px"),7);
+  d->add(strdup("py"),8);
+  d->add(strdup("qx"),9);
+  d->add(strdup("qy"),10);
+
+  freopen("iesire.txt","w",stdout);
   line=new char[140000];  
   fread(line,140000,1,fin);
-  int i=0;
   node *n[6];
   c=strtok(line,"\n");
+  beg=c;
   while(c!=NULL)
   { 
-    printf("%s\n",c);
+    //printf("%s\n",c);
     aux=c;
     n[i]=process(aux);
     n[i++]->print(true);
-    printf("\n\n");
+    printf("\n");
     c=strtok(NULL,"\n");
+    beg=c;
   }
   return 0;
 }
