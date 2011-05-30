@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <vector>
 #include <math.h>
-char *beg;
-int i;
 using namespace std;
 bool isNumber(char *s)
 { for (char *c=s;*c!=0;c++)
@@ -36,7 +34,8 @@ public:
       { return this->values[i]; 
       }
     }
-  }
+  } 
+
 };
 
 class node
@@ -60,7 +59,7 @@ public:
     this->inverse=inverse;
   }
 
-  double evaluate()
+  double evaluate(dict *d)
   { char* func;
     char Cos[]="Cos[",Sin[]="Sin[",Abs[]="Abs[";
     float ret;
@@ -69,36 +68,60 @@ public:
       if(node::priority(this)==1)
       { ret=0;  
         for (;it!=this->list.end();++it)
-        { ret+=(*it)->evaluate();
+        { if((*it)->minus)
+          {ret-=(*it)->evaluate(d);
+          }
+          else
+          {ret+=(*it)->evaluate(d);
+          }
         }
       }
       else if(node::priority(this)==2)
-      { ret=this->list[0]->evaluate();
+      { ret=this->list[0]->evaluate(d);
+        if(this->minus)
+        { ret*=-1;
+        }
         for (++it;it!=this->list.end();++it)
-        { ret*=(*it)->evaluate();
+        { if((*it)->inverse)
+          { ret/=(*it)->evaluate(d);
+          }
+          else
+          { ret*=(*it)->evaluate(d);
+          }
         }
       }
       else if(node::priority(this)==3)
-      { return pow(this->list[0]->evaluate(),this->list[1]->evaluate()); 
+      { if(this->list[1]->minus)
+        { ret=1.0/pow(this->list[0]->evaluate(d),this->list[1]->evaluate(d));
+        }
+        else
+        { ret=pow(this->list[0]->evaluate(d),this->list[1]->evaluate(d));
+        }
+        if(this->minus)
+        { ret*=-1;
+        }
       }
     }
     else
     { if(!strcmp(func=Cos,this->s))
-      { ret=cos(this->list[0]->evaluate()); 
+      { ret=cos(this->list[0]->evaluate(d)); 
       }
       else if(!strcmp(func=Sin,this->s))
-      { ret=sin(this->list[0]->evaluate()); 
+      { ret=sin(this->list[0]->evaluate(d)); 
       }
       else if(!strcmp(func=Abs,this->s))
-      { ret=fabs(this->list[0]->evaluate()); 
+      { ret=fabs(this->list[0]->evaluate(d)); 
       }
       else if(!strcmp("(",this->s))
-      { ret=this->list[0]->evaluate();
+      { ret=this->list[0]->evaluate(d);
       }
       else
-      { ret=1;
-          
-        /* todo */
+      { if(isNumber(this->s))
+        { ret=toNumber(this->s);
+        }
+        else
+        { ret=d->get(this->s);
+        }     
       } 
        
     }
@@ -120,7 +143,7 @@ public:
         this->list[0]->print(true);
         for (++it;it!=this->list.end();++it)
         { if(node::priority(this)==2)
-          { printf("%c",(*it)->inverse?'/':' ');
+          { printf("%c",(*it)->inverse?'/':'*');
           }
           (*it)->print(true);  
         }
@@ -418,12 +441,12 @@ void test()
   e->print(true); 
   printf("\n");
 }
-
 int main ()
 { char *line,*c;
   char *aux;
+  dict *d=new dict; 
+  int i=0;
   FILE *fin=fopen("math.in","r");
-  dict *d=new dict();
   d->add(strdup("a"),1);
   d->add(strdup("b"),2);
   d->add(strdup("c"),3);
@@ -434,22 +457,22 @@ int main ()
   d->add(strdup("py"),8);
   d->add(strdup("qx"),9);
   d->add(strdup("qy"),10);
+  d->add(strdup("pi"),3.14);
 
   freopen("iesire.txt","w",stdout);
   line=new char[140000];  
   fread(line,140000,1,fin);
   node *n[6];
   c=strtok(line,"\n");
-  beg=c;
   while(c!=NULL)
   { 
     //printf("%s\n",c);
     aux=c;
     n[i]=process(aux);
-    n[i++]->print(true);
-    printf("\n");
+    n[i]->print(true);
+    printf("\t%lf\n",n[i]->evaluate(d));
+    i++;
     c=strtok(NULL,"\n");
-    beg=c;
   }
   return 0;
 }
