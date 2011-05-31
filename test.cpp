@@ -1,34 +1,13 @@
+#include <math.h>
 #include <stdio.h>
-#include <string.h>
-#include <vector>
-using namespace std;
-class C
-{ 
-private:
-  int a;
-public:
-  C(int x)
-  {a=x;
-  }
-
-  int get()
-  { return a;
-  }
-
-};
-
 int main ()
-{ vector<C> v;
-  for (int i=0;i<10;i++)
-  { v.push_back(i);
+{ int i;
+  long double d;
+  for (i=0,d=1.0;i<(1<<20);i++)
+  { d*=2.0;
+    printf("%lle %d\n",d,isinf(d));
+    if(isinf(d))
+      break;
   }
-
-  for (int i=0;i<10;i++)
-  { printf("%d ",v[i].get());
-  }
-  printf("\n"); 
-  for (vector<C>::iterator it=v.begin();it!=v.end();++it)
-  { printf("%d ",it->get()); 
-  } 
   return 0;
 }
