@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from sys import stdout
 op=("*","/","+","-","^")
 func=("cos","sin")
 def d(l,t):
@@ -43,6 +42,3 @@ def pr(l):
     r+=")"
   return r
 
-if __name__=="__main__":
-  t=("*","a","a")
-  stdout.write(pr(d(t,"a"))+"\n")
