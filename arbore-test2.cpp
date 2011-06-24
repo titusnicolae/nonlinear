@@ -10,6 +10,7 @@ int main ()
   node *n[100];
   int i=0;
   dict *d=new dict;
+  d->add(strdup("pi"),3.141);
   char *c=strtok(text,"\n"),*aux;
   while(c!=NULL)
   { aux=c;

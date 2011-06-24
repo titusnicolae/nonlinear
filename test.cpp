@@ -1,13 +1,11 @@
-#include <math.h>
+#include <vector>
 #include <stdio.h>
+using namespace std;
 int main ()
-{ int i;
-  long double d;
-  for (i=0,d=1.0;i<(1<<20);i++)
-  { d*=2.0;
-    printf("%lle %d\n",d,isinf(d));
-    if(isinf(d))
-      break;
-  }
+{ 
+  char ana[]="ana are mere si ce daca";
+  char *p=ana;
+
+  printf("%c",p[10]);     
   return 0;
 }
