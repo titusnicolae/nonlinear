@@ -3,10 +3,16 @@
 from mat import * 
 #from math import pi
 
-if __name__=="__main__":
-  """u=[1,0,0]
-  v=[0,0,4]
-  s=[4,4,0]
-  d=intersect(u,v,s)
-  print(d)"""
-  print isElement()
+
+
+
+if __name__=="__main__":  
+  r=['a','b','g']
+  u=['ux','uy','uz']
+  v=['vx','vy','vz']
+  s=['sx','sy','sz']
+  d=delta(u,v,s,r)
+  print(nops(dt(d,"a")))
+  print(nops(prune(dt(d,"a"))))
+
+

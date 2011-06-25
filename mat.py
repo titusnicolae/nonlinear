@@ -4,29 +4,75 @@ op=("*","/","+","-","^")
 func=("cos","sin")
 
 def dt(l,t):
-  if l[0] in op:
-    if l[0]=="+" or l[0]=="-":
-      return ("+",dt(l[1],t),dt(l[2],t))
-    elif l[0]=="*": 
-      return ("+",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t)))
-    elif l[0]=="/":
-      return ("/",("-",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t))),("^",l[2],2))
-    elif l[0]=="^":
-      return ("*",("*",l[2],("^",l[1],l[2]-1)),dt(l[1],t))
-  
-  elif l[0] in func:
-    if l[0]=="sin":
-      return ("*",("cos",l[1]),dt(l[1],t))  
-    elif l[0]=="cos":
-      return ("*",
-              ("*",-1,("sin",l[1])),
-              dt(l[1],t)
-             ) 
-  else:
-    if l[0]==t:
-      return 1
+  if isNumber(l):
+    return 0
+  elif isString(l):
+    if l==t: return 1
+    else: return 0
+  elif isTuple(l): 
+    if l[0] in op:
+      if l[0]=="+" or l[0]=="-":
+        return ("+",dt(l[1],t),dt(l[2],t))
+      elif l[0]=="*": 
+        return ("+",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t)))
+      elif l[0]=="/":
+        return ("/",("-",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t))),("^",l[2],2))
+      elif l[0]=="^":
+        return ("*",("*",l[2],("^",l[1],l[2]-1)),dt(l[1],t))
+    
+    elif l[0] in func:
+      if l[0]=="sin":
+        return ("*",("cos",l[1]),dt(l[1],t))  
+      elif l[0]=="cos":
+        return ("*",
+                ("*",-1,("sin",l[1])),
+                dt(l[1],t)
+               ) 
     else:
-      return 0  
+      print("Error @ dt")
+  elif isList(l):
+    return map(lambda x:dt(x,t),l)
+  else:
+    print("Error2 @dt") 
+
+def prune(l):
+  if isList(l):
+    return map(prune,l)
+  elif isTuple(l):
+    if l[0] in op:
+      a=prune(l[1])
+      b=prune(l[2])
+      if l[0]=="+":
+        if a==0: return b
+        elif b==0: return a
+        else: return ("+",a,b)    
+      elif l[0]=="-":
+        if b==0: return a
+        else: return ("-",a,b)
+      elif l[0]=="*":
+        if a==0 or b==0: return 0
+        else: return ('*',a,b)
+      elif l[0]=="/": 
+        if a==0: return 0
+        else: return ('/',a,b)
+      elif l[0]=="^":
+        if a==0: return 0
+        elif b==1: return a
+        else: return ("^",a,b)
+      else:
+        print("Error @ prune # op")  
+    if l[0] in func:
+      a=prune(l[1])
+      if l[0]=="sin":
+        if a==0: return 0
+        else: return ('sin',a)
+      elif l[0]=='cos':
+        if a==0: return 1
+        else: return ('cos',a)
+  elif isNumber(l) or isString(l):
+    return l
+  else:
+    print("Error @ prune # type")    
 
 def pr(l):
   r=""
@@ -48,11 +94,18 @@ def pr(l):
 def true(l):
   return reduce(lambda a,b:a and b,l)
 
+def isTuple(x):
+  return isinstance(x,tuple)
+def isNumber(x):
+  return isinstance(x,(int,float,long))
+def isString(x):
+  return isinstance(x,basestring)
+
 def isElement(*x):
   return true(map(lambda x:isinstance(x,(int,float,long,tuple,basestring)),x))
 
-def isList(x):
-  return isinstance(x,list) and not isinstance(x[0],list)
+def isList(*x):
+  return true(map(lambda x:isinstance(x,list) and not isinstance(x[0],list),x))
 
 def isMatrix(x):
   return isinstance(x,list) and isinstance(x[0],list)
@@ -100,7 +153,7 @@ def linsolve(m,c):
     r.append(div(det(rc(m,c,i)),d))
   return r
  
-def tf(x): #tofloat
+def f(x): #tofloat
   if isMatrix(x):
     return [(lambda l:map(float,l))(l) for l in x]
   if isList(x):
@@ -108,11 +161,37 @@ def tf(x): #tofloat
   if isinstance(x,(int,long)):
     return float(x)
 
+def cross(a,b):
+  if isList(a,b):
+    t=map(list,zip(a,b))
+    return [det(t[1:]),minus(det([t[0],t[2]])),det(t[:2])] 
+      
+  else:
+    print("Error @ cross") 
+
 def sub(a,b):
   if isElement(a,b):
     return ("-",a,b)
+  elif isList(a,b):
+    return map(lambda (x,y):("-",x,y),izip(a,b))
   else:
     print "Error @ sub" 
+
+def minus(a):
+  if isElement(a):
+    return ("*",-1,a) 
+  elif isList(a):
+    return map(lambda x:("*",-1,x),a)
+  else:
+    print "Error @ minus" 
+       
+def add(a,b):
+  if isElement(a,b):
+    return ("+",a,b)
+  elif isList(a,b):
+    return map(lambda (x,y):("+",x,y),izip(a,b)) 
+  else:
+    print "Error @add" 
  
 def div(a,b):
   if isElement(a,b):
@@ -141,9 +220,12 @@ def mul(a,b):
     if isElement(b):
       return [[("*",b,x) for x in c ] for c in a] 
     elif isList(b):
-      return [mul(b,c) for c in zip(*a)]
+      return [mul(b,c) for c in map(list,zip(*a))]
     elif isMatrix(b):
-      return [[mul(c,d) for c in a] for d in b]
+      return [[mul(c,d) for c in map(list,zip(*a))] for d in b]
+
+def sq(a):
+  return mul(a,a)
 
 def id():
   return [[1,0,0],[0,1,0],[0,0,1]]
@@ -166,6 +248,7 @@ def parse(x,d=None):
       if x[0] in op:
         a=parse(x[1],d)
         b=parse(x[2],d)
+    #    print(a,x[0],b)
         if x[0]=="+":   return a+b 
         elif x[0]=="-": return a-b 
         elif x[0]=="*": return a*b 
@@ -180,7 +263,7 @@ def parse(x,d=None):
   elif isMatrix(x):
     return [[parse(e,d) for e in c] for c in x] 
  
-def nops(x):
+def nops (x):
   if isElement(x):
     if isinstance(x,(int,long,float,basestring)):
       return 0
@@ -189,12 +272,61 @@ def nops(x):
         return 1+nops(x[1])+nops(x[2])
       elif x[0] in func:
         return 1+nops(x[1])
+  elif isList(x):
+    return reduce(lambda x,y:x+y,map(nops,x)) 
+  elif isMatrix(x):
+    s=0
+    for c in x:
+      for e in c:
+        s+=nops(e)
+    return s
   else:
-    print "cmon"   
+    print "Error @ nops"   
 
-#def intersect(u,v,s):
-#  b=div(,)
-  
-  
+def Sin(a):
+  return ("sin",a)
+
+def Cos(a):
+  return ("cos",a)
+
+def rot(a,b,g):
+  ra=[[1,0,0],
+      [0,Cos(a),Sin(a)],
+      [0,minus(Sin(a)),Cos(a)]]
+  rb=[[Cos(b),0,minus(Sin(b))],
+      [0,1,0],
+      [Sin(b),0,Cos(b)]]
+  rg=[[Cos(g),Sin(g),0],
+      [minus(Sin(g)),Cos(g),0],
+      [0,0,1]] 
+  return mul(ra,mul(rb,rg))
+
+def intersect(u,v,s):
+  return linsolve([u,v,cross(u,v)],s)
+
+def delta(u,v,s,r):
+  p=intersect(u,v,s) 
+  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
    
-      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
