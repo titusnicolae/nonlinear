@@ -17,7 +17,8 @@ if __name__=="__main__":
   v=['vx','vy','vz']
   s=['sx','sy','sz']
   step=0.1
-  var=genRandomDict(r,u,v,s) 
+  var=genRandomDict(r,u,v,s)
+  print var 
   d=delta(u,v,s,r)
   da=prune(dt(d,'a'))
   db=prune(dt(d,'b'))
@@ -35,7 +36,7 @@ if __name__=="__main__":
   vdz=parse(dz,var)
 
   print("%.6f %.6f %.6f %.6f %.6f %.6f %.6f " % (vd,vda,vdb,vdg,vdx,vdy,vdz)) 
-  for i in range(1,200):
+  for i in range(1,1000):
     vd=parse(d,var)      
     vda=parse(da,var)      
     vdb=parse(db,var)      
@@ -56,4 +57,4 @@ if __name__=="__main__":
     if vdz>0: var['sz']+=step
     else: var['sz']-=step
     print("%.6f %.6f %.6f %.6f %.6f %.6f %.6f " % (vd,vda,vdb,vdg,vdx,vdy,vdz))
-    if i%50==0: step=step/10.0
+    if i%20==0: step=step/2.0
