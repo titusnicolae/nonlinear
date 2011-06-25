@@ -45,16 +45,20 @@ def pr(l):
     r+=")"
   return r
 
+def true(l):
+  return reduce(lambda a,b:a and b,l)
 
-def isElement(x):
-  return isinstance(x,(int,float,long,tuple,basestring))
+def isElement(*x):
+  return true(map(lambda x:isinstance(x,(int,float,long,tuple,basestring)),x))
+
 def isList(x):
   return isinstance(x,list) and not isinstance(x[0],list)
+
 def isMatrix(x):
   return isinstance(x,list) and isinstance(x[0],list)
 
 def csum(a,b):
-  if isElement(a) and isElement(b):
+  if isElement(a,b): 
     return ("+",a,b)
   elif isList(a) and isList(b):
     return [("+",x,y) for x,y in izip(a,b)]
@@ -103,9 +107,15 @@ def tf(x): #tofloat
     return map(float,x)
   if isinstance(x,(int,long)):
     return float(x)
-   
+
+def sub(a,b):
+  if isElement(a,b):
+    return ("-",a,b)
+  else:
+    print "Error @ sub" 
+ 
 def div(a,b):
-  if isElement(a) and isElement(b):
+  if isElement(a,b):
     return ("/",a,b)
   else:
     print "Error @ div!"
@@ -181,4 +191,10 @@ def nops(x):
         return 1+nops(x[1])
   else:
     print "cmon"   
- 
+
+#def intersect(u,v,s):
+#  b=div(,)
+  
+  
+   
+      
