@@ -3,24 +3,24 @@ from math import sin,cos
 op=("*","/","+","-","^")
 func=("cos","sin")
 
-def d(l,t):
+def dt(l,t):
   if l[0] in op:
     if l[0]=="+" or l[0]=="-":
-      return ("+",d(l[1],t),d(l[2],t))
+      return ("+",dt(l[1],t),dt(l[2],t))
     elif l[0]=="*": 
-      return ("+",("*",d(l[1],t),l[2]),("*",l[1],d(l[2],t)))
+      return ("+",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t)))
     elif l[0]=="/":
-      return ("/",("-",("*",d(l[1],t),l[2]),("*",l[1],d(l[2],t))),("^",l[2],2))
+      return ("/",("-",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t))),("^",l[2],2))
     elif l[0]=="^":
-      return ("*",("*",l[2],("^",l[1],l[2]-1)),d(l[1],t))
+      return ("*",("*",l[2],("^",l[1],l[2]-1)),dt(l[1],t))
   
   elif l[0] in func:
     if l[0]=="sin":
-      return ("*",("cos",l[1]),d(l[1],t))  
+      return ("*",("cos",l[1]),dt(l[1],t))  
     elif l[0]=="cos":
       return ("*",
               ("*",-1,("sin",l[1])),
-              d(l[1],t)
+              dt(l[1],t)
              ) 
   else:
     if l[0]==t:
@@ -52,12 +52,64 @@ def isList(x):
   return isinstance(x,list) and not isinstance(x[0],list)
 def isMatrix(x):
   return isinstance(x,list) and isinstance(x[0],list)
-#def csum(a,b):
-#  if isList(a) and isList(b):
-#    return [("+",x,y) for x,y in izip(a,b)]
-#  else:
-#    print("shit")
+
+def csum(a,b):
+  if isElement(a) and isElement(b):
+    return ("+",a,b)
+  elif isList(a) and isList(b):
+    return [("+",x,y) for x,y in izip(a,b)]
+  else:
+    print("shit")
+
+def par(k):
+  if k%2:
+    return -1
+  else:
+    return 1 
+
+def subm(m,k):
+  r=[]
+  for (i,l) in enumerate(m):
+    if i==k: continue
+    r.append(l[1:])
+  return r 
+   
+def det(m):
+  if len(m)==1:
+    return m[0][0] 
+  return reduce(lambda x,y: ("+",x,y),
+                [("*",par(i),("*",m[i][0],det(subm(m,i)))) for (i,l) in enumerate(m)])
+
+def rc(m,c,p): #replace with column c in matrix m at position p
+  r=[]
+  for (i,e) in enumerate(m):
+    if i==p:
+      r.append(c)
+    else:
+      r.append(e)
+  return r 
+
+def linsolve(m,c): 
+  r=[]
+  d=det(m)
+  for (i,e) in enumerate(m):
+    r.append(div(det(rc(m,c,i)),d))
+  return r
  
+def tf(x): #tofloat
+  if isMatrix(x):
+    return [(lambda l:map(float,l))(l) for l in x]
+  if isList(x):
+    return map(float,x)
+  if isinstance(x,(int,long)):
+    return float(x)
+   
+def div(a,b):
+  if isElement(a) and isElement(b):
+    return ("/",a,b)
+  else:
+    print "Error @ div!"
+  
 def mul(a,b):
   if isElement(a): 
     if isElement(b):
@@ -117,4 +169,16 @@ def parse(x,d=None):
     return [parse(e,d) for e in x]   
   elif isMatrix(x):
     return [[parse(e,d) for e in c] for c in x] 
-  
+ 
+def nops(x):
+  if isElement(x):
+    if isinstance(x,(int,long,float,basestring)):
+      return 0
+    elif isinstance(x,tuple):
+      if x[0] in op:
+        return 1+nops(x[1])+nops(x[2])
+      elif x[0] in func:
+        return 1+nops(x[1])
+  else:
+    print "cmon"   
+ 
