@@ -4,7 +4,7 @@ op=("*","/","+","-","^")
 func=("cos","sin")
 
 def dt(l,t):
-  ifaisNumber(l):
+  if isNumber(l):
     return 0
   elif isString(l):
     if l==t: return 1
@@ -38,6 +38,46 @@ def dt(l,t):
     print("Error2 @dt") 
 
 def prune(l):
+  if isList(l):
+    return map(prune,l)
+  elif isTuple(l):
+    if l[0] in op:
+      a=prune(l[1])
+      b=prune(l[2])
+      if l[0]=="+":
+        if a==0: return b
+        elif b==0: return a
+        else: return ("+",a,b)    
+      elif l[0]=="-":
+        if b==0: return a
+        else: return ("-",a,b)
+      elif l[0]=="*":
+        if a==0 or b==0: return 0
+        else: return ('*',a,b)
+      elif l[0]=="/": 
+        if a==0: return 0
+        else: return ('/',a,b)
+      elif l[0]=="^":
+        if a==0: return 0
+        elif b==1: return a
+        else: return ("^",a,b)
+      else:
+        print("Error @ prune # op")  
+    if l[0] in func:
+      a=prune(l[1])
+      if l[0]=="sin":
+        if a==0: return 0
+        else: return ('sin',a)
+      elif l[0]=='cos':
+        if a==0: return 1
+        else: return ('cos',a)
+  elif isNumber(l) or isString(l):
+    return l
+  else:
+    print("Error @ prune # type")    
+
+
+def smartprune(l,dic):
   if isList(l):
     return map(prune,l)
   elif isTuple(l):
@@ -277,7 +317,7 @@ def transpose(m):
     for j in range(0,3):
       r[j].append(m[i][j])
   return r
- 
+
 def parse(x,d=None):
   if isElement(x):
     if isinstance(x,(int,long,float)):
@@ -346,9 +386,10 @@ def intersect(u,v,s):
   return linsolve([u,v,cross(u,v)],s)
 
 def delta(u,v,s,r):
-  p=intersect(u,v,s) 
-  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
-   
+  p=intersect(u,mul(rot(*r),v),s) 
+#  p=intersect(u,v,s) 
+#  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
+  return sq(mul(p[2],cross(u,mul(rot(*r),v))))
 
 
 

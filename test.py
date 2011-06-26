@@ -1,4 +1,4 @@
 #!/usr/bin/python
-from mat import *
-print partialparse(('*',2,'a')) 
-
+a=((1,),)
+b=((1,),)
+print a==b
