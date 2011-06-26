@@ -4,7 +4,7 @@ op=("*","/","+","-","^")
 func=("cos","sin")
 
 def dt(l,t):
-  if isNumber(l):
+  ifaisNumber(l):
     return 0
   elif isString(l):
     if l==t: return 1
