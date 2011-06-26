@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from mat import *
-stepx={'x':1000.0,'y':1000.0,'z':1000.0}
+stepx={'x':10**4,'y':10**4,'z':10**4}
+stepa={'a':1.0,'b':1.0,'g':1.0}
 def readfile(filename):
   f=open(filename,"r")
   p1,p2=[],[]
@@ -48,25 +49,33 @@ def optx(F,d,var,v,vf):
     return vf
   return tvf
      
-def opta(F,d,var,v):
+def opta(F,d,var,v,vf):
   vd=parse(d,var)
+  tv=var[v]
   if vd>0:
     var[v]-=0.01
   else:
     var[v]+=0.01
+  tvf=parse(F,var)
+  if tvf>vf:
+    var[v]=tv
+    stepa[v]/=2.0
+    return vf
+  return tvf
  
 def minimize(F,dl):
-  var={'x':-10000,'y':7000,'z':1000,'a':2.9,'b':-0.3,'g':-0.5}
+  var={'x':10000,'y':7000,'z':1000,'a':2.9,'b':-0.3,'g':-0.5}
   i=0 
   while True:
 #    optx(F,dl[0],var,'x')
     vf=parse(F,var)
     vf=optx(F,dl[1],var,'y',vf)
     vf=optx(F,dl[2],var,'z',vf)
-    opta(F,dl[3],var,'a')
-    opta(F,dl[4],var,'b')
-    opta(F,dl[5],var,'g')
-    print("%.1f %.1f %.1f %.1f %.2f %.2f %.2f %1.f %1.f %1.f %d"%(parse(F,var),var['x'],var['y'],var['z'],var['a'],var['b'],var['g'],stepx['x'],stepx['y'],stepx['z'],i))
+    vf=opta(F,dl[3],var,'a',vf)
+    vf=opta(F,dl[4],var,'b',vf)
+    vf=opta(F,dl[5],var,'g',vf)
+    print("%e %.1f %.1f %.1f %.3f %.3f %.3f %f %f %f %.2f %.2f %.2f %d"%
+          ((vf/6.0)**(0.5),var['x'],var['y'],var['z'],var['a'],var['b'],var['g'],stepx['x'],stepx['y'],stepx['z'],stepa['a'],stepa['b'],stepa['g'],i))
     i+=1 
 
 if __name__=="__main__":
