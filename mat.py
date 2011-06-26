@@ -11,8 +11,10 @@ def dt(l,t):
     else: return 0
   elif isTuple(l): 
     if l[0] in op:
-      if l[0]=="+" or l[0]=="-":
+      if l[0]=="+":
         return ("+",dt(l[1],t),dt(l[2],t))
+      elif l[0]=="-":
+        return ("-",dt(l[1],t),dt(l[2],t))
       elif l[0]=="*": 
         return ("+",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t)))
       elif l[0]=="/":
@@ -74,6 +76,43 @@ def prune(l):
   else:
     print("Error @ prune # type")    
 
+def partialparse(l):
+  if isList(l):
+    return map(prune,l)
+  elif isTuple(l):
+    if l[0] in op:
+      a=prune(l[1])
+      b=prune(l[2])
+      if isNumber(a,b):
+        if l[0]=="+":
+          return a+b 
+        elif l[0]=="-":
+          return a-b
+        elif l[0]=="*":
+          return a*b 
+        elif l[0]=="/": 
+          return a/b
+        elif l[0]=="^":
+          return a**b
+        else:
+          print("Error @ prune # op") 
+      else:
+        return (l[0],a,b)  
+
+    if l[0] in func:
+      a=prune(l[1])
+      if isNumber(a):
+        if l[0]=="sin":
+          return sin(a)
+        elif l[0]=='cos':
+          return cos(a) 
+      else:
+        return (l[0],a)
+  elif isNumber(l) or isString(l):
+    return l
+  else:
+    print("Error @ prune # type")    
+
 def pr(l):
   r=""
   if not isinstance(l,(tuple)):
@@ -96,8 +135,10 @@ def true(l):
 
 def isTuple(x):
   return isinstance(x,tuple)
-def isNumber(x):
-  return isinstance(x,(int,float,long))
+
+def isNumber(*x):
+  return true(map(lambda x:isinstance(x,(int,float,long)),x))
+
 def isString(x):
   return isinstance(x,basestring)
 

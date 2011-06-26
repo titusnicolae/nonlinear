@@ -18,9 +18,11 @@ if __name__=="__main__":
   s=['sx','sy','sz']
   step=0.1
   var=genRandomDict(r,u,v,s)
-  print var 
+#  print var 
   d=delta(u,v,s,r)
   da=prune(dt(d,'a'))
+  print nops(da)
+  print "---------------"
   db=prune(dt(d,'b'))
   dg=prune(dt(d,'g'))
   dx=prune(dt(d,'sx'))
