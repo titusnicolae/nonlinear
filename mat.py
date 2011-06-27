@@ -37,6 +37,28 @@ def dt(l,t):
   else:
     print("Error2 @dt") 
 
+def prunedag(l,dic):
+  if isList(l):
+    return map(lambda x:prunedag(x,dic),l)
+  elif isTuple(l):
+    if l[0] in op:
+      a=prunedag(l[1],dic)
+      b=prunedag(l[2],dic)
+      if (l[0],a,b) not in dic:
+        dic[(l[0],a,b)]=(l[0],a,b)
+      return dic[(l[0],a,b)]
+
+    elif l[0] in func:
+      a=prunedag(l[1],dic)
+      if (l[0],a) not in dic:
+        dic[(l[0],a)]=(l[0],a)
+      return dic[(l[0],a)]
+
+  elif isNumber(l) or isString(l):
+    return l
+  else:
+    print("Error @ prunedag # type")    
+
 def prune(l):
   if isList(l):
     return map(prune,l)
@@ -53,6 +75,8 @@ def prune(l):
         else: return ("-",a,b)
       elif l[0]=="*":
         if a==0 or b==0: return 0
+        elif a==1: return b
+        elif b==1: return a
         else: return ('*',a,b)
       elif l[0]=="/": 
         if a==0: return 0
@@ -63,7 +87,7 @@ def prune(l):
         else: return ("^",a,b)
       else:
         print("Error @ prune # op")  
-    if l[0] in func:
+    elif l[0] in func:
       a=prune(l[1])
       if l[0]=="sin":
         if a==0: return 0
@@ -76,45 +100,6 @@ def prune(l):
   else:
     print("Error @ prune # type")    
 
-
-def smartprune(l,dic):
-  if isList(l):
-    return map(prune,l)
-  elif isTuple(l):
-    if l[0] in op:
-      a=prune(l[1])
-      b=prune(l[2])
-      if l[0]=="+":
-        if a==0: return b
-        elif b==0: return a
-        else: return ("+",a,b)    
-      elif l[0]=="-":
-        if b==0: return a
-        else: return ("-",a,b)
-      elif l[0]=="*":
-        if a==0 or b==0: return 0
-        else: return ('*',a,b)
-      elif l[0]=="/": 
-        if a==0: return 0
-        else: return ('/',a,b)
-      elif l[0]=="^":
-        if a==0: return 0
-        elif b==1: return a
-        else: return ("^",a,b)
-      else:
-        print("Error @ prune # op")  
-    if l[0] in func:
-      a=prune(l[1])
-      if l[0]=="sin":
-        if a==0: return 0
-        else: return ('sin',a)
-      elif l[0]=='cos':
-        if a==0: return 1
-        else: return ('cos',a)
-  elif isNumber(l) or isString(l):
-    return l
-  else:
-    print("Error @ prune # type")    
 
 def partialparse(l):
   if isList(l):
@@ -318,6 +303,67 @@ def transpose(m):
       r[j].append(m[i][j])
   return r
 
+def parsee(x,d,dic):
+  if isElement(x):
+    if isinstance(x,(int,long,float)):
+      return x
+    elif isinstance(x,(basestring)):
+      if not x in d: print "crap"
+      return d[x]
+    elif isinstance(x,(tuple)):
+      if x[0] in op:
+        a=parsee(x[1],d,dic)
+        b=parsee(x[2],d,dic)
+        if a not in dic: dic[a]=[x[1]]
+        else: dic[a].append(x[1])
+        if b not in dic: dic[b]=[x[2]]
+        else: dic[b].append(x[2])
+    #    print(a,x[0],b)
+        if x[0]=="+":   return a+b 
+        elif x[0]=="-": return a-b 
+        elif x[0]=="*": return a*b 
+        elif x[0]=='/': return a/b 
+        elif x[0]=='^': return a**b
+      if x[0] in func:
+        a=parsee(x[1],d,dic)
+        if a not in dic: dic[a]=[x[1]]
+        else: dic[a].append(x[1])
+        if x[0]=="sin":   return sin(a)
+        elif x[0]=="cos": return cos(a)
+  elif isList(x):
+    return [parsee(e,d,dic) for e in x]   
+  elif isMatrix(x):
+    return [[parsee(e,d,dic) for e in c] for c in x] 
+
+def parsedag(x,dic,d=None):
+  if isElement(x):
+    if isinstance(x,(int,long,float)):
+      return x
+    elif isinstance(x,(basestring)):
+      if not x in d: print "crap"
+      return d[x]
+    elif isinstance(x,(tuple)):
+      if x[0] in op:
+        if x not in dic:
+          a=parsedag(x[1],dic,d)
+          b=parsedag(x[2],dic,d)
+          if x[0]=="+":   dic[x]=a+b
+          elif x[0]=="-": dic[x]=a-b 
+          elif x[0]=="*": dic[x]=a*b 
+          elif x[0]=='/': dic[x]=a/b 
+          elif x[0]=='^': dic[x]=a**b
+        return dic[x]
+      if x[0] in func:
+        if x not in dic:
+          a=parsedag(x[1],dic,d)
+          if x[0]=="sin":   dic[x]=sin(a)
+          elif x[0]=="cos": dic[x]=cos(a)
+        return dic[x]
+  elif isList(x):
+    return [parsedag(e,dic,d) for e in x]   
+  elif isMatrix(x):
+    return [[parsedag(e,dic,d) for e in c] for c in x] 
+ 
 def parse(x,d=None):
   if isElement(x):
     if isinstance(x,(int,long,float)):
@@ -390,25 +436,4 @@ def delta(u,v,s,r):
 #  p=intersect(u,v,s) 
 #  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
   return sq(mul(p[2],cross(u,mul(rot(*r),v))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
