@@ -113,7 +113,6 @@ if __name__=="__main__":
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
   var={'x':random(),'y':random(),'z':random(),'a':random(),'b':random(),'g':random()}
-  dic={}
-  prunedag(F,dic)
-  print(nops(F)) 
-  print(len(dic))
+  u1=parse(F,var)
+  u2=parsedag(prunedag(F,{}),{},var)
+  print "%f %f"%(u1,u2)

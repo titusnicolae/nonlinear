@@ -33,19 +33,19 @@ def system(v1,v2):
   r=['a','b','g']
   for (p1,p2) in izip(v1,v2):
     d.append(delta(p1,p2,s,r))
-  F=reduce(add,d)
-  dl=map(lambda x: prune(dt(F,x)),['x','y','z','a','b','g'])
+  F=prunedag(reduce(add,d),{})
+  dl=map(lambda x: prunedag(prune(dt(F,x)),{}),['x','y','z','a','b','g'])
 #  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
   return (F,dl)
 
 def optx(F,d,var,v,vf):
-  vd=parse(d,var)
+  vd=parsedag(d,{},var)
   tv=var[v]
   if vd>0:
     var[v]-=stepx[v]
   else:
     var[v]+=stepx[v]
-  tvf=parse(F,var)
+  tvf=parsedag(F,{},var)
   if tvf>vf:
     var[v]=tv
     stepx[v]/=1.2
@@ -54,14 +54,14 @@ def optx(F,d,var,v,vf):
   return tvf
 
 def opt2(F,d,var,v,vf):
-  vd1=parse(d[0],var)
-  vd2=parse(d[1],var)  
+  vd1=parsedag(d[0],{},var)
+  vd2=parsedag(d[1],{},var)  
   p1=vd1/((vd1**2+vd2**2)**(0.5))
   p2=vd2/((vd1**2+vd2**2)**(0.5))
   tv=(var[v[0]],var[v[1]])
   var[v[0]]-=p1*stepx[v]
   var[v[1]]-=p2*stepx[v]
-  tvf=parse(F,var)
+  tvf=parsedag(F,{},var)
   print(tvf,vf)
   if tvf>vf:
     var[v[0]],var[v[1]]=tv
@@ -71,13 +71,13 @@ def opt2(F,d,var,v,vf):
   return tvf
  
 def opta(F,d,var,v,vf):
-  vd=parse(d,var)
+  vd=parsedag(d,{},var)
   tv=var[v]
   if vd>0:
     var[v]-=stepa[v]
   else:
     var[v]+=stepa[v]
-  tvf=parse(F,var)
+  tvf=parsedag(F,{},var)
   if tvf>vf:
     var[v]=tv
     stepa[v]/=2.0
@@ -89,12 +89,13 @@ def minimize(F,dl):
 #  var={'x':10000.0,'y':4035.0,'z':-13050.1,'a':6.4,'b':-3.1,'g':-0.3} #9.141
 #  var={'x':10000.0,'y':-286.3,'z':5048.3,'a':4.7,'b':-3.2,'g':-1.6} #
 #  var={'x':10000.0,'y':1961.8,'z':-9239,'a':-0.2,'b':0.9,'g':0.4} #967.5
-  var={'x':10000.0,'y':5898.5,'z':-16996.1,'a':-0.7,'b':0.9,'g':0.3} #864
+#  var={'x':10000.0,'y':5912.5,'z':-17051.1,'a':-0.7,'b':0.9,'g':0.3} #864
+  var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
   i=0
   print "iaai"
   while True:
 #    optx(F,dl[0],var,'x')
-    vf=parse(F,var)
+    vf=parsedag(F,{},var)
 #    vf=optx(F,dl[1],var,'y',vf)
 #    vf=optx(F,dl[2],var,'z',vf)
     vf=opt2(F,(dl[1],dl[2]),var,('y','z'),vf)
