@@ -67,22 +67,26 @@ def prune(l):
       a=prune(l[1])
       b=prune(l[2])
       if l[0]=="+":
-        if a==0: return b
+        if isNumber(a,b): return a+b
+        elif a==0: return b
         elif b==0: return a
         else: return ("+",a,b)    
       elif l[0]=="-":
-        if b==0: return a
+        if isNumber(a,b): return a-b
+        elif b==0: return a
         else: return ("-",a,b)
       elif l[0]=="*":
-        if a==0 or b==0: return 0
+        if isNumber(a,b): return a*b
         elif a==1: return b
         elif b==1: return a
         else: return ('*',a,b)
       elif l[0]=="/": 
-        if a==0: return 0
+        if isNumber(a,b): return a/b
+        elif a==0: return 0
         else: return ('/',a,b)
       elif l[0]=="^":
-        if a==0: return 0
+        if isNumber(a,b):return a**b
+        elif a==0: return 0
         elif b==1: return a
         else: return ("^",a,b)
       else:
@@ -90,53 +94,16 @@ def prune(l):
     elif l[0] in func:
       a=prune(l[1])
       if l[0]=="sin":
-        if a==0: return 0
+        if isNumber(a): return sin(a)
         else: return ('sin',a)
       elif l[0]=='cos':
-        if a==0: return 1
+        if isNumber(b): return cos(a)
         else: return ('cos',a)
   elif isNumber(l) or isString(l):
     return l
   else:
     print("Error @ prune # type")    
 
-
-def partialparse(l):
-  if isList(l):
-    return map(prune,l)
-  elif isTuple(l):
-    if l[0] in op:
-      a=prune(l[1])
-      b=prune(l[2])
-      if isNumber(a,b):
-        if l[0]=="+":
-          return a+b 
-        elif l[0]=="-":
-          return a-b
-        elif l[0]=="*":
-          return a*b 
-        elif l[0]=="/": 
-          return a/b
-        elif l[0]=="^":
-          return a**b
-        else:
-          print("Error @ prune # op") 
-      else:
-        return (l[0],a,b)  
-
-    if l[0] in func:
-      a=prune(l[1])
-      if isNumber(a):
-        if l[0]=="sin":
-          return sin(a)
-        elif l[0]=='cos':
-          return cos(a) 
-      else:
-        return (l[0],a)
-  elif isNumber(l) or isString(l):
-    return l
-  else:
-    print("Error @ prune # type")    
 
 def pr(l):
   r=""
@@ -302,38 +269,6 @@ def transpose(m):
     for j in range(0,3):
       r[j].append(m[i][j])
   return r
-
-def parsee(x,d,dic):
-  if isElement(x):
-    if isinstance(x,(int,long,float)):
-      return x
-    elif isinstance(x,(basestring)):
-      if not x in d: print "crap"
-      return d[x]
-    elif isinstance(x,(tuple)):
-      if x[0] in op:
-        a=parsee(x[1],d,dic)
-        b=parsee(x[2],d,dic)
-        if a not in dic: dic[a]=[x[1]]
-        else: dic[a].append(x[1])
-        if b not in dic: dic[b]=[x[2]]
-        else: dic[b].append(x[2])
-    #    print(a,x[0],b)
-        if x[0]=="+":   return a+b 
-        elif x[0]=="-": return a-b 
-        elif x[0]=="*": return a*b 
-        elif x[0]=='/': return a/b 
-        elif x[0]=='^': return a**b
-      if x[0] in func:
-        a=parsee(x[1],d,dic)
-        if a not in dic: dic[a]=[x[1]]
-        else: dic[a].append(x[1])
-        if x[0]=="sin":   return sin(a)
-        elif x[0]=="cos": return cos(a)
-  elif isList(x):
-    return [parsee(e,d,dic) for e in x]   
-  elif isMatrix(x):
-    return [[parsee(e,d,dic) for e in c] for c in x] 
 
 def parsedag(x,dic,d=None):
   if isElement(x):
