@@ -2,7 +2,7 @@
 from mat import *
 from math import log
 from random import random
-step={('y','z','a','b','g'):100,('y','z'):100,('a','b','g'):0.1}
+step={('y','z','a','b','g'):100,('y','z'):100,('a','b','g'):0.1,('a',):0.1,('b',):0.1,('g',):0.1}
 stepx={'x':10**4,'y':10000.0,'z':10000.0,('y','z'):50.0}
 stepa={'a':0.1,'b':0.1,'g':0.1,('a','b','g'):0.1}
 
@@ -39,8 +39,10 @@ def system(v1,v2):
 #  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
   return (F,dl)
 
-def optm(F,d,var,v,vf,q=None):
+def optm(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
+  if cu!=None: Fcu=curry(F,cu)
+  else: Fcu=F
   vd=map(lambda x:parsedag(x,{},var),d)
   sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
   p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
@@ -48,19 +50,41 @@ def optm(F,d,var,v,vf,q=None):
   while True: 
     for (x,y) in izip(v,p):
       var[x]-=y*step[v]
-    tvf=parsedag(F,{},var)
+    tvf=parsedag(Fcu,{},var)
     if tvf>vf:
       for (x,y) in izip(v,tv):
         var[x]=y 
       step[v]/=1.5
     else:
-      step[v]*=2.0
+      step[v]*=stepup
+      return tvf
+
+def optmx(F,d,var,v,vf,q=None,cu=None,stepup=None):
+  if q==None: q=[1.0]*len(d)
+  if cu!=None: Fcu=curry(F,cu)
+  else: Fcu=F
+  vd=map(lambda x:parsedag(x,{},var),d)
+  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
+  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
+  tv=[var[x] for x in v]
+#  step[v]*=2.0
+  while True: 
+    for (x,y) in izip(v,p):
+      var[x]-=y*step[v]
+    tvf=parsedag(Fcu,{},var)
+    if tvf>vf:
+      for (x,y) in izip(v,tv):
+        var[x]=y 
+      step[v]/=1.1
+    else:
+      step[v]*=stepup
       return tvf
 
 def minimize(F,dl):
   var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
+#  var={'x':10000.0,'y':random()*20000.0-10000.0,'z':random()*20000-10000,'a':random()*2-1,'b':random()*2-1,'g':random()*2-1} #864
   i=0
-  print "iaai"
+  j=0
   vf=parsedag(F,{},var)
   while True:
 #    optx(F,dl[0],var,'x')
@@ -73,9 +97,20 @@ def minimize(F,dl):
 #    vf=optm(F,(dl[1],dl[2]),var,('y','z'),vf)
 #    vf=opt2(F,(dl[1],dl[2]),var,('y','z'),vf)
 #    vf=optabg(F,(dl[3],dl[4],dl[5]),var,('a','b','g'),vf)i
-    vf=optm(F,(dl[1],dl[2]),var,('y','z'),vf,[1.0,1.0])
-    vf=optm(F,(dl[3],dl[4],dl[5]),var,('a','b','g'),vf,[1.0,1.0,1.0])
-    print("%f %f %e %e %e %f %d"%(var['y'],var['z'],var['a'],var['b'],var['g'],(vf/6.0)**0.5,i))
+    vf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g']},stepup=2.0)
+    if j%3==0:
+#      vf=optm(F,(dl[3],),var,('a',),vf,cu={'x':var['x'],'y':var['y'],'z':var['z'],'b':var['b'],'g':var['g']},stepup=2.0)
+      vf=optm(F,(dl[3],),var,('a',),vf,stepup=2.0)
+    elif j%3==1:
+ #     vf=optm(F,(dl[4],),var,('b',),vf,cu={'x':var['x'],'y':var['y'],'z':var['z'],'a':var['a'],'g':var['g']},stepup=2.0)
+      vf=optm(F,(dl[4],),var,('b',),vf,stepup=2.0)
+    elif j%3==2:
+  #    vf=optm(F,(dl[5],),var,('g',),vf,cu={'x':var['x'],'y':var['y'],'z':var['z'],'a':var['a'],'b':var['b']},stepup=2.0)
+      vf=optm(F,(dl[5],),var,('g',),vf,stepup=2.0)
+
+#      vf=optm(F,(dl[3],dl[4],dl[5]),var,('a','b','g'),vf,stepup=2.0)
+    j+=1
+    print("%.1f %.1f (%.1f) %.2f %.2f %.2f (%.2f) %f %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,i))
 #    print("%e ( %.1f %.1f %.1f ) %.1f %.1f %.1f %.0f ( %.2e %.2e %.2e )%d"%
 #          ((vf/6.0)**(0.5),var['x'],var['y'],var['z'],var['a'],var['b'],var['g'],stepx[('y','z')],stepa['a'],stepa['b'],stepa['g'],i))
 #            parse(dl[0],var),parse(dl[1],var),parse(dl[2],var),parse(dl[3],var),parse(dl[4],var),parse(dl[5],var),i))

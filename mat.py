@@ -57,7 +57,37 @@ def prunedag(l,dic):
   elif isNumber(l) or isString(l):
     return l
   else:
-    print("Error @ prunedag # type")    
+    print("Error @ prunedag # type")
+ 
+def curry(l,d):
+  if isTuple(l):
+    if l[0] in op:
+      a=curry(l[1],d)
+      b=curry(l[2],d)
+      if isString(a) and a in d: a=d[a]
+      if isString(b) and b in d: b=d[b]
+      if isNumber(a,b):
+        if l[0]=="+": return a+b 
+        elif l[0]=="-": return a-b 
+        elif l[0]=="*": return a*b 
+        elif l[0]=="/": return a/b 
+        elif l[0]=="^": return a**b 
+      else: return (l[0],a,b)
+    elif l[0] in func:
+      a=curry(l[1],d)
+      if isString(a) and a in d: a=d[a]
+      if isNumber(a):
+        if l[0]=="cos": return cos(a)
+        elif l[0]=="sin": return sin(a)
+      else: return (l[0],a)
+  elif isString(l):
+    if l in d: return d[l]
+    return l
+  elif isNumber(l): return l
+  elif isList(l):
+    return map(prune,l)
+  print("Error @ curry")
+      
 
 def prune(l):
   if isList(l):
@@ -77,6 +107,7 @@ def prune(l):
         else: return ("-",a,b)
       elif l[0]=="*":
         if isNumber(a,b): return a*b
+        elif a==0 or b==0: return 0
         elif a==1: return b
         elif b==1: return a
         else: return ('*',a,b)
@@ -97,7 +128,7 @@ def prune(l):
         if isNumber(a): return sin(a)
         else: return ('sin',a)
       elif l[0]=='cos':
-        if isNumber(b): return cos(a)
+        if isNumber(a): return cos(a)
         else: return ('cos',a)
   elif isNumber(l) or isString(l):
     return l

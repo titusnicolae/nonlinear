@@ -35,6 +35,7 @@ def system(v1,v2):
   for (p1,p2) in izip(v1,v2):
     d.append(delta(p1,p2,s,r))
   F=prunedag(prune(reduce(add,d)),{})
+#  dl=[]
   dl=map(lambda x: prunedag(prune(dt(F,x)),{}),['x','y','z','a','b','g'])
 #  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
   return (F,dl)
@@ -156,7 +157,7 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-
-
-
-     
+  print (nops(dl[3]),nops(dl[4]),nops(dl[5]))
+  print nops(curry(dl[3],{'y':1.0,'z':3.0,'b':4.0,'g':5.0}))
+  print nops(curry(dl[4],{'y':1.0,'z':3.0,'a':4.0,'g':5.0}))
+  print nops(curry(dl[5],{'y':1.0,'z':3.0,'a':4.0,'b':5.0}))
