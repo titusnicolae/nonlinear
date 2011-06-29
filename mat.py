@@ -27,7 +27,7 @@ def dt(l,t):
         return ("*",("cos",l[1]),dt(l[1],t))  
       elif l[0]=="cos":
         return ("*",
-                ("*",-1,("sin",l[1])),
+                ("-",0,("sin",l[1])),
                 dt(l[1],t)
                ) 
     else:
@@ -44,9 +44,18 @@ def prunedag(l,dic):
     if l[0] in op:
       a=prunedag(l[1],dic)
       b=prunedag(l[2],dic)
-      if (l[0],a,b) not in dic:
-        dic[(l[0],a,b)]=(l[0],a,b)
-      return dic[(l[0],a,b)]
+      if l[0]=='*' or l[0]=='+':
+        if (l[0],a,b) in dic:
+          return dic[(l[0],a,b)]
+        elif (l[0],b,a) in dic:
+          return dic[(l[0],b,a)]
+        else:
+          dic[(l[0],a,b)]=(l[0],a,b)
+          return dic[(l[0],a,b)]
+      else:
+        if (l[0],a,b) not in dic:
+          dic[(l[0],a,b)]=(l[0],a,b)
+        return dic[(l[0],a,b)]
 
     elif l[0] in func:
       a=prunedag(l[1],dic)
@@ -85,7 +94,7 @@ def curry(l,d):
     return l
   elif isNumber(l): return l
   elif isList(l):
-    return map(prune,l)
+    return map(lambda x:curry(x,d),l)
   print("Error @ curry")
       
 
@@ -110,6 +119,8 @@ def prune(l):
         elif a==0 or b==0: return 0
         elif a==1: return b
         elif b==1: return a
+       # elif isTuple(a,b) and l[1][0]=='-' and l[1][1]=='0' and l[2][0]=='-' and l[2][1]=='0':
+      #    return ('*',l[1][2],l[2][2])
         else: return ('*',a,b)
       elif l[0]=="/": 
         if isNumber(a,b): return a/b
@@ -156,8 +167,8 @@ def pr(l):
 def true(l):
   return reduce(lambda a,b:a and b,l)
 
-def isTuple(x):
-  return isinstance(x,tuple)
+def isTuple(*x):
+  return true(map(lambda x:isinstance(x,tuple),x))
 
 def isNumber(*x):
   return true(map(lambda x:isinstance(x,(int,float,long)),x))
@@ -243,9 +254,9 @@ def sub(a,b):
 
 def minus(a):
   if isElement(a):
-    return ("*",-1,a) 
+    return ("-",0,a) 
   elif isList(a):
-    return map(lambda x:("*",-1,x),a)
+    return map(lambda x:("-",0,x),a)
   else:
     print "Error @ minus" 
        

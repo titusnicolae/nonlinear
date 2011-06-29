@@ -1,6 +1,7 @@
 #!/usr/bin/python
-d={}
-p=(2,2)
-d[('+',p,p)]=True
-if ('+',p,p) in d:
-  print "OK"
+a='a'
+b=a
+x=0
+for i in xrange(1,10**7):
+  if a==b:
+    x+=1 

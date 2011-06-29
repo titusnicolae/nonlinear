@@ -157,7 +157,7 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-  print (nops(dl[3]),nops(dl[4]),nops(dl[5]))
-  print nops(curry(dl[3],{'y':1.0,'z':3.0,'b':4.0,'g':5.0}))
-  print nops(curry(dl[4],{'y':1.0,'z':3.0,'a':4.0,'g':5.0}))
-  print nops(curry(dl[5],{'y':1.0,'z':3.0,'a':4.0,'b':5.0}))
+  d2=map(lambda x,y:prunedag(prune(dt(x,y)),{}),dl,['x','y','z','a','b','g'])
+  for (e,f) in izip(dl,d2):
+    print "%d %d"%(nops(e),nops(f))
+  print nops(curry(d2[3],{'x':1,'y':1,'z':1,'b':1,'g':1}))
