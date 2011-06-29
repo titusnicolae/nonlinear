@@ -269,9 +269,6 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-#  print(nops(F)) #82307
-#  print(prune(dl[0])) #64391
-#  print(nops(prune(dl[5])))) #132731
   minimize(F,dl)
 
 
