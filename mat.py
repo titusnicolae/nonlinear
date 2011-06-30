@@ -2,8 +2,46 @@ from itertools import izip
 from math import sin,cos
 op=("*","/","+","-","^")
 func=("cos","sin")
-
 def dt(l,t):
+  if isNumber(l):
+    return 0
+  elif isString(l):
+    if l==t: return 1
+    else: return 0
+  elif isTuple(l): 
+    if l[0] in op:
+      if l[0]=="+":
+        if isNumber(l[1]): return dt(l[2],t)
+        if isNumber(l[2]): return dt(l[1],t)   
+        return ("+",dt(l[1],t),dt(l[2],t))
+      elif l[0]=="-":
+        if isNumber(l[2]): return dt(l[1],t)
+        return ("-",dt(l[1],t),dt(l[2],t))
+      elif l[0]=="*":
+        if isNumber(l[1]): return ("*",l[1],dt(l[2],t))
+        if isNumber(l[2]): return ("*",dt(l[1],t),l[2])
+        return ("+",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t)))
+      elif l[0]=="/":
+        return ("/",("-",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t))),("^",l[2],2))
+      elif l[0]=="^":
+        if l[2]==2: return ("*",2,("*",l[1],dt(l[1],t)))
+        return ("*",("*",l[2],("^",l[1],l[2]-1)),dt(l[1],t))
+    
+    elif l[0] in func:
+      if l[0]=="sin":
+        if l[1]==t: return ("cos",l[1])
+        return 0 
+      elif l[0]=="cos":
+        if l[1]==t: return ('-',0,("sin",l[1]))
+        return 0
+    else:
+      print("Error @ dt")
+  elif isList(l):
+    return map(lambda x:dt(x,t),l)
+  else:
+    print("Error2 @dt") 
+
+def dtold(l,t):
   if isNumber(l):
     return 0
   elif isString(l):

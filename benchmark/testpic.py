@@ -2,7 +2,9 @@
 from mat import *
 from math import log
 from random import random
-
+from time import clock
+tstart=clock()
+step2={('y','z'):100.0}
 step={('y','z','a','b','g'):100,('y','z'):100,('a','b','g'):0.1,('a',):0.1,('b',):0.1,('g',):0.1,'a':0.1,'b':0.1,'g':0.1}
 stepx={'x':10**4,'y':10000.0,'z':10000.0,('y','z'):50.0}
 stepa={'a':0.1,'b':0.1,'g':0.1,('a','b','g'):0.1}
@@ -91,6 +93,41 @@ def optmd2(F,d,d2,var,v,vf,stepup=None):
     else:
       step[v]*=stepup
       return tvf
+
+def crazymx(F,d,var,v,vf,q=None,cu=None,stepup=None):
+  dbg=False
+  if q==None: q=[1.0]*len(d)
+  if cu!=None: Fcu=curry(F,cu)
+  else: Fcu=F
+  vd=map(lambda x:parsedag(x,{},var),d)
+  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
+  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
+  tvv=[var[x] for x in v]
+  for (x,y) in izip(v,p):
+    var[x]-=y*step[v] 
+   
+  vd=map(lambda x:parsedag(x,{},var),d)
+  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
+  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
+  tv=[var[x] for x in v]
+  i=0
+  step2[('y','z')]=step[('y','z')]*2
+  while True and i<100: 
+    i+=1
+    for (x,y) in izip(v,p):
+      var[x]-=y*step2[v]
+    tvf=parsedag(Fcu,{},var)
+    if tvf>vf:
+      for (x,y) in izip(v,tv):
+        var[x]=y 
+      step2[v]/=1.2
+    else:
+      step2[v]*=2.0
+      return tvf
+  for (x,y) in izip(v,tvv):
+    var[x]=y
+  if dbg and gdbg: print "damn"
+  return vf
 
 def optmx(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
@@ -210,8 +247,8 @@ def score(s):
 def randomize():
   var={}
   var['x']=10000.0
-  var['y']=random()*20000-100000 
-  var['z']=random()*20000-100000 
+  var['y']=random()*20000-10000 
+  var['z']=random()*20000-10000 
   var['a']=random()*3.14-1.57
   var['b']=random()*3.14-1.57
   var['g']=random()*3.14-1.57
@@ -223,24 +260,25 @@ def resetstep():
   step[('b',)]=0.1
   step[('g',)]=0.1
 
-def printshit(var,vf,j):
-  print("%.1f %.1f (%.1f) %.2f %.2f %.2f (%.2f) %f %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,j))
+def printshit(var,vf,j,mode=None):
+  print("%.1f %.1f (%.1f) %.2f %.2f %.2f (%.2f) %f %d mode %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,j,mode))
 
 def minimize(F,dl,d2=None):
   mode=1
-  var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
+#  var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
   var=randomize()
+  print var
   j=0
   vf=parsedag(F,{},var)
   pvf=1.0
-  dbg=True 
+  dbg=False
   while True:
     if mode==1:
       vf,pvf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
       if dbg and gdbg:    
         print "mode 1"
-        printshit(var,vf,j)
-      if vf/pvf>0.999: 
+        printshit(var,vf,j,mode)
+      if vf/pvf>0.999:
         mode=2      
     else:
       pvf=vf
@@ -253,22 +291,21 @@ def minimize(F,dl,d2=None):
         vf=optm(F,(dl[5],),var,('g',),vf,stepup=2.0)
       j+=1
 
-      if vf/pvf>0.9999: 
-        var=randomize()
-        resetstep()
-        vf=parsedag(F,{},var)
-        j=0
       if dbg and gdbg:    
         print "mode 2"
-        printshit(var,vf,j)
-      if score(vf)<100: break
-  print("%.1f %.1f (%.1f) %.2f %.2f %.2f (%.2f) %f %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,j))
+        printshit(var,vf,j,mode)
+      if clock()-tstart>60.0: 
+        printshit(var,vf,j,mode)
+        break
 
 if __name__=="__main__":
   (p1,p2,s,f)=readfile("points2.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
+#  print(nops(F)) #82307
+#  print(prune(dl[0])) #64391
+#  print(nops(prune(dl[5])))) #132731
   minimize(F,dl)
 
 

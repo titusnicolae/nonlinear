@@ -157,19 +157,12 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-  
-  d2=map(lambda x,y:prunedag(prune(dt(x,y)),{}),dl,['x','y','z','a','b','g'])
-  for e in d2:
-    print nops(e)
-#  for (e,f) in izip(dl,d2):
-#    print "%d %d"%(nops(e),nops(f))
-#  print nops(curry(d2[3],{'x':1,'y':1,'z':1,'b':1,'g':1}))
-"""  var=['x','y','z','a','b','g']
-  for (e,w) in izip(var,d2):
-    var2={}
-    for f in var:
-      if e!=f:
-        var2[f]=1.0
-    print "%s %d"%(var2,nops(curry(w,var2)))
-
-  """
+  dic={}
+  for e in ['a','b','g','x','y','z']:
+    dic[e]=random()*10
+  dl2=map(lambda x: prunedag(prune(dtold(F,x)),{}),['x','y','z','a','b','g'])
+  for (x,y) in izip(dl,dl2):
+    v1=parsedag(x,{},dic)  
+    v2=parsedag(y,{},dic)
+    print "%f %f %d"%(v1,v2,v1==v2) 
+   

@@ -268,11 +268,10 @@ def minimize(F,dl,d2=None):
 #  var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
   var=randomize()
   print var
-  print clock()-tstart
   j=0
   vf=parsedag(F,{},var)
   pvf=1.0
-  dbg=True
+  dbg=False
   while True:
     if mode==1:
       vf,pvf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
@@ -280,7 +279,6 @@ def minimize(F,dl,d2=None):
         print "mode 1"
         printshit(var,vf,j,mode)
       if vf/pvf>0.999:
-        print clock()-tstart 
         mode=2      
     else:
       pvf=vf
