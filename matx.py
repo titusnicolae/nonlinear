@@ -1,7 +1,22 @@
 from itertools import izip
 from math import sin,cos
-op=("*","/","+","-","^")
-func=("cos","sin")
+def qadd(a,b):
+  return a+b
+def qsub(a,b):
+  return a-b
+def qmul(a,b):
+  return a*b
+def qdiv(a,b):
+  return a/b
+def qexp(a,b):
+  return a**b 
+def qsin(a):
+  return sin(a)
+def qcos(a):
+  return cos(a)
+op=(qmul,qdiv,qadd,qsub,qexp)
+func=(qcos,qsin)
+
 def dt(l,t):
   if isNumber(l):
     return 0
@@ -10,29 +25,29 @@ def dt(l,t):
     else: return 0
   elif isTuple(l): 
     if l[0] in op:
-      if l[0]=="+":
+      if l[0]==qadd:
         if isNumber(l[1]): return dt(l[2],t)
         if isNumber(l[2]): return dt(l[1],t)   
-        return ("+",dt(l[1],t),dt(l[2],t))
-      elif l[0]=="-":
+        return (qadd,dt(l[1],t),dt(l[2],t))
+      elif l[0]==qsub:
         if isNumber(l[2]): return dt(l[1],t)
-        return ("-",dt(l[1],t),dt(l[2],t))
-      elif l[0]=="*":
-        if isNumber(l[1]): return ("*",l[1],dt(l[2],t))
-        if isNumber(l[2]): return ("*",dt(l[1],t),l[2])
-        return ("+",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t)))
-      elif l[0]=="/":
-        return ("/",("-",("*",dt(l[1],t),l[2]),("*",l[1],dt(l[2],t))),("^",l[2],2))
-      elif l[0]=="^":
-        if l[2]==2: return ("*",2,("*",l[1],dt(l[1],t)))
-        return ("*",("*",l[2],("^",l[1],l[2]-1)),dt(l[1],t))
+        return (qsub,dt(l[1],t),dt(l[2],t))
+      elif l[0]==qmul:
+        if isNumber(l[1]): return (qmul,l[1],dt(l[2],t))
+        if isNumber(l[2]): return (qmul,dt(l[1],t),l[2])
+        return (qadd,(qmul,dt(l[1],t),l[2]),(qmul,l[1],dt(l[2],t)))
+      elif l[0]==qdiv:
+        return (qdiv,(qsub,(qmul,dt(l[1],t),l[2]),(qmul,l[1],dt(l[2],t))),(qexp,l[2],2))
+      elif l[0]==qexp:
+        if l[2]==2: return (qmul,2,(qmul,l[1],dt(l[1],t)))
+        return (qmul,(qmul,l[2],(qexp,l[1],l[2]-1)),dt(l[1],t))
     
     elif l[0] in func:
-      if l[0]=="sin":
-        if l[1]==t: return ("cos",l[1])
+      if l[0]==qsin:
+        if l[1]==t: return (qcos,l[1])
         return 0 
-      elif l[0]=="cos":
-        if l[1]==t: return ('-',0,("sin",l[1]))
+      elif l[0]==qcos:
+        if l[1]==t: return (qsub,0,(qsin,l[1]))
         return 0
     else:
       print("Error @ dt")
@@ -48,7 +63,7 @@ def prunedag(l,dic):
     if l[0] in op:
       a=prunedag(l[1],dic)
       b=prunedag(l[2],dic)
-      if l[0]=='*' or l[0]=='+':
+      if l[0]==qmul or l[0]==qadd:
         if (l[0],a,b) in dic:
           return dic[(l[0],a,b)]
         elif (l[0],b,a) in dic:
@@ -80,18 +95,19 @@ def curry(l,d):
       if isString(a) and a in d: a=d[a]
       if isString(b) and b in d: b=d[b]
       if isNumber(a,b):
-        if l[0]=="+": return a+b 
-        elif l[0]=="-": return a-b 
-        elif l[0]=="*": return a*b 
-        elif l[0]=="/": return a/b 
-        elif l[0]=="^": return a**b 
+        return l[0](a,b)
+#        if l[0]==qmul: return a*b 
+#        elif l[0]==qadd: return a+b 
+#        elif l[0]==qsub: return a-b 
+#        elif l[0]==qdiv: return a/b 
+#        elif l[0]==qexp: return a**b
       else: return (l[0],a,b)
     elif l[0] in func:
       a=curry(l[1],d)
       if isString(a) and a in d: a=d[a]
       if isNumber(a):
-        if l[0]=="cos": return cos(a)
-        elif l[0]=="sin": return sin(a)
+        if l[0]==qsin: return sin(a)
+        elif l[0]==qcos: return cos(a)
       else: return (l[0],a)
   elif isString(l):
     if l in d: return d[l]
@@ -109,42 +125,42 @@ def prune(l):
     if l[0] in op:
       a=prune(l[1])
       b=prune(l[2])
-      if l[0]=="+":
+      if l[0]==qadd:
         if isNumber(a,b): return a+b
         elif a==0: return b
         elif b==0: return a
-        else: return ("+",a,b)    
-      elif l[0]=="-":
+        else: return (qadd,a,b)    
+      elif l[0]==qsub:
         if isNumber(a,b): return a-b
         elif b==0: return a
-        else: return ("-",a,b)
-      elif l[0]=="*":
+        else: return (qsub,a,b)
+      elif l[0]==qmul:
         if isNumber(a,b): return a*b
         elif a==0 or b==0: return 0
         elif a==1: return b
         elif b==1: return a
-       # elif isTuple(a,b) and l[1][0]=='-' and l[1][1]=='0' and l[2][0]=='-' and l[2][1]=='0':
-      #    return ('*',l[1][2],l[2][2])
-        else: return ('*',a,b)
-      elif l[0]=="/": 
+# elif isTuple(a,b) and l[1][0]==qsub and l[1][1]==' and l[2][0]==qsub and l[2][1]=='0':
+      #    return (qmul,l[1][2],l[2][2])
+        else: return (qmul,a,b)
+      elif l[0]==qdiv: 
         if isNumber(a,b): return a/b
         elif a==0: return 0
-        else: return ('/',a,b)
-      elif l[0]=="^":
+        else: return (qdiv,a,b)
+      elif l[0]==qexp:
         if isNumber(a,b):return a**b
         elif a==0: return 0
         elif b==1: return a
-        else: return ("^",a,b)
+        else: return (qexp,a,b)
       else:
         print("Error @ prune # op")  
     elif l[0] in func:
       a=prune(l[1])
-      if l[0]=="sin":
+      if l[0]==qsin:
         if isNumber(a): return sin(a)
-        else: return ('sin',a)
-      elif l[0]=='cos':
+        else: return (qsin,a)
+      elif l[0]==qcos:
         if isNumber(a): return cos(a)
-        else: return ('cos',a)
+        else: return (qcos,a)
   elif isNumber(l) or isString(l):
     return l
   else:
@@ -191,9 +207,9 @@ def isMatrix(x):
 
 def csum(a,b):
   if isElement(a,b): 
-    return ("+",a,b)
+    return (qadd,a,b)
   elif isList(a) and isList(b):
-    return [("+",x,y) for x,y in izip(a,b)]
+    return [(qadd,x,y) for x,y in izip(a,b)]
   else:
     print("shit")
 
@@ -213,8 +229,8 @@ def subm(m,k):
 def det(m):
   if len(m)==1:
     return m[0][0] 
-  return reduce(lambda x,y: ("+",x,y),
-                [("*",par(i),("*",m[i][0],det(subm(m,i)))) for (i,l) in enumerate(m)])
+  return reduce(lambda x,y: (qadd,x,y),
+                [(qmul,par(i),(qmul,m[i][0],det(subm(m,i)))) for (i,l) in enumerate(m)])
 
 def rc(m,c,p): #replace with column c in matrix m at position p
   r=[]
@@ -250,54 +266,54 @@ def cross(a,b):
 
 def sub(a,b):
   if isElement(a,b):
-    return ("-",a,b)
+    return (qsub,a,b)
   elif isList(a,b):
-    return map(lambda (x,y):("-",x,y),izip(a,b))
+    return map(lambda (x,y):(qsub,x,y),izip(a,b))
   else:
     print "Error @ sub" 
 
 def minus(a):
   if isElement(a):
-    return ("-",0,a) 
+    return (qsub,0,a) 
   elif isList(a):
-    return map(lambda x:("-",0,x),a)
+    return map(lambda x:(qsub,0,x),a)
   else:
     print "Error @ minus" 
        
 def add(a,b):
   if isElement(a,b):
-    return ("+",a,b)
+    return (qadd,a,b)
   elif isList(a,b):
-    return map(lambda (x,y):("+",x,y),izip(a,b)) 
+    return map(lambda (x,y):(qadd,x,y),izip(a,b)) 
   else:
     print "Error @add" 
  
 def div(a,b):
   if isElement(a,b):
-    return ("/",a,b)
+    return (qdiv,a,b)
   else:
     print "Error @ div!"
   
 def mul(a,b):
   if isElement(a): 
     if isElement(b):
-      return ("*",a,b)
+      return (qmul,a,b)
     elif isList(b):
-      return [("*",a,x) for x in b]
+      return [(qmul,a,x) for x in b]
     elif isMatrix(b):
-      return [[("*",a,x) for x in c ] for c in b] 
+      return [[(qmul,a,x) for x in c ] for c in b] 
 
   elif isList(a):
     if isElement(b):
-      return [("*",b,x) for x in a]
+      return [(qmul,b,x) for x in a]
     elif isList(b):
-      return reduce(lambda x,y:("+",x,y),[("*",x,y) for (x,y) in izip(a,b)])
+      return reduce(lambda x,y:(qadd,x,y),[(qmul,x,y) for (x,y) in izip(a,b)])
     elif isMatrix(b):
       return "wtf"
 
   elif isMatrix(a):
     if isElement(b):
-      return [[("*",b,x) for x in c ] for c in a] 
+      return [[(qmul,b,x) for x in c ] for c in a] 
     elif isList(b):
       return [mul(b,c) for c in map(list,zip(*a))]
     elif isMatrix(b):
@@ -328,17 +344,19 @@ def parsedag(x,dic,d=None):
         if x not in dic:
           a=parsedag(x[1],dic,d)
           b=parsedag(x[2],dic,d)
-          if x[0]=="+":   dic[x]=a+b
-          elif x[0]=="-": dic[x]=a-b 
-          elif x[0]=="*": dic[x]=a*b 
-          elif x[0]=='/': dic[x]=a/b 
-          elif x[0]=='^': dic[x]=a**b
+          dic[x]=x[0](a,b)
+#          if x[0]==qmul: dic[x]=a*b 
+#          elif x[0]==qadd: dic[x]=a+b 
+#          elif x[0]==qsub: dic[x]=a-b 
+#          elif x[0]==qdiv: dic[x]=a/b 
+#          elif x[0]==qexp: dic[x]=a**b
         return dic[x]
       if x[0] in func:
         if x not in dic:
-          a=parsedag(x[1],dic,d)
-          if x[0]=="sin":   dic[x]=sin(a)
-          elif x[0]=="cos": dic[x]=cos(a)
+          a=parsedag(x[1],dic,d)       
+          dic[x]=x[0](a) 
+#          if x[0]==qsin:   dic[x]=sin(a)
+#          elif x[0]==qcos: dic[x]=cos(a)
         return dic[x]
   elif isList(x):
     return [parsedag(e,dic,d) for e in x]   
@@ -356,16 +374,17 @@ def parse(x,d=None):
       if x[0] in op:
         a=parse(x[1],d)
         b=parse(x[2],d)
-    #    print(a,x[0],b)
-        if x[0]=="+":   return a+b 
-        elif x[0]=="-": return a-b 
-        elif x[0]=="*": return a*b 
-        elif x[0]=='/': return a/b 
-        elif x[0]=='^': return a**b
+        return x[0](a,b)
+#        if x[0]==qmul: return a*b 
+#        elif x[0]==qadd: return a+b 
+#        elif x[0]==qsub: return a-b 
+#        elif x[0]==qdiv: return a/b 
+#        elif x[0]==qexp: return a**b
       if x[0] in func:
         a=parse(x[1],d)
-        if x[0]=="sin":   return sin(a)
-        elif x[0]=="cos": return cos(a)
+#        if x[0]==qsin:   return sin(a)
+#        elif x[0]==qcos: return cos(a)
+        return x[0](a)
   elif isList(x):
     return [parse(e,d) for e in x]   
   elif isMatrix(x):
@@ -391,11 +410,12 @@ def nops (x):
   else:
     print "Error @ nops"   
 
+
 def Sin(a):
-  return ("sin",a)
+  return (qsin,a)
 
 def Cos(a):
-  return ("cos",a)
+  return (qcos,a)
 
 def rot(a,b,g):
   ra=[[1,0,0],

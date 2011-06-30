@@ -1,2 +1,5 @@
 #!/usr/bin/python
-print "yay"
+from math import *
+l=[]
+l.append(sin)
+print l[0](12)

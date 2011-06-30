@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from mat import *
+from matx import *
 from math import log
 from random import random
 from time import clock
@@ -111,7 +111,7 @@ def crazymx(F,d,var,v,vf,q=None,cu=None,stepup=None):
   p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
   tv=[var[x] for x in v]
   i=0
-  step2[('y','z')]=step[('y','z')]*2
+  step2[('y','z')]=step[('y','z')]*4
   while True and i<100: 
     i+=1
     for (x,y) in izip(v,p):
@@ -148,6 +148,34 @@ def optmx(F,d,var,v,vf,q=None,cu=None,stepup=None):
     else:
       step[v]*=stepup
       return tvf
+
+def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
+  if q==None: q=[1.0]*len(d)
+  if cu!=None: Fcu=curry(F,cu)
+  else: Fcu=F
+  vd=map(lambda x:parsedag(x,{},var),d)
+  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
+  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
+  tv=[var[x] for x in v]
+  stop=False 
+  while True: 
+    for (x,y) in izip(v,p):
+      var[x]-=y*step[v]
+    tvf=parsedag(Fcu,{},var)
+    if tvf>vf:
+      for (x,y) in izip(v,tv):
+        var[x]=y 
+      step[v]/=1.1
+      stop=True
+    else:
+      if stop:
+        step[v]*=stepup
+        return tvf
+      else:
+        for (x,y) in izip(v,tv):
+          var[x]=y
+        step[v]*=1.1        
+       
 
 def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
@@ -279,13 +307,15 @@ def minimize(F,dl,d2=None):
       if dbg and gdbg:    
         print "mode 1"
         printshit(var,vf,j,mode)
-      if vf/pvf>0.999:
+      if vf/pvf>0.9999:
         print clock()-tstart 
         mode=2      
     else:
       pvf=vf
-      vf=crazymx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
-      vf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
+      if j%2==0:
+        vf=crazymx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
+      if j%2==1:
+        vf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
       if j%3==0:
         vf=optm(F,(dl[3],),var,('a',),vf,stepup=2.0)
       elif j%3==1:
@@ -306,10 +336,8 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-#  print(nops(F)) #82307
-#  print(prune(dl[0])) #64391
-#  print(nops(prune(dl[5])))) #132731
   minimize(F,dl)
+
 
 
 
