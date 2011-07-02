@@ -459,15 +459,15 @@ def minimize(F,dl,d2=None):
       if j%3==0:
         cu=var.copy()
         del cu['a']
-        (pda,vf)=optmx2(F,(dl[3],),var,('a',),vf,cu=cu,stepup=1.0)
+        (pda,vf)=optmx2(F,(dl[3],),var,('a',),vf,stepup=1.0)
       elif j%3==1:
         cu=var.copy()
         del cu['b']
-        (pdb,vf)=optmx2(F,(dl[4],),var,('b',),vf,cu=cu,stepup=1.0)
+        (pdb,vf)=optmx2(F,(dl[4],),var,('b',),vf,stepup=1.0)
       elif j%3==2:
         cu=var.copy()
         del cu['g']
-        (pdg,vf)=optmx2(F,(dl[5],),var,('g',),vf,cu=cu,stepup=1.0)
+        (pdg,vf)=optmx2(F,(dl[5],),var,('g',),vf,stepup=1.0)
 
       j+=1
       if dbg and gdbg and dbgmode:    
