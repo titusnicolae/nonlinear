@@ -1,5 +1,7 @@
 from itertools import izip
 from math import sin,cos
+#import psyco
+#psyco.full()
 def qadd(a,b):
   return a+b
 def qsub(a,b):
@@ -242,11 +244,12 @@ def rc(m,c,p): #replace with column c in matrix m at position p
   return r 
 
 def linsolve(m,c): 
-  r=[]
-  d=det(m)
-  for (i,e) in enumerate(m):
-    r.append(div(det(rc(m,c,i)),d))
-  return r
+#  r=[]
+#  d=det(m)
+#  for (i,e) in enumerate(m):
+#    r.append(div(det(rc(m,c,i)),d))
+#  return r
+  return div(det(rc(m,c,2)),det(m))
  
 def f(x): #tofloat
   if isMatrix(x):
@@ -436,5 +439,5 @@ def delta(u,v,s,r):
   p=intersect(u,mul(rot(*r),v),s) 
 #  p=intersect(u,v,s) 
 #  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
-  return sq(mul(p[2],cross(u,mul(rot(*r),v))))
+  return sq(mul(p,cross(u,mul(rot(*r),v))))
 

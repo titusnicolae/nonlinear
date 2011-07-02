@@ -1,15 +1,18 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
+import gtk
+import gobject
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
+import time
+
+
 from matx import *
 from math import log
 from random import random
 from time import clock
-import psyco
-psyco.bind(parsedag)
-psyco.bind(curry)
 tstart=clock()
-
 step2={('y','z'):100.0}
-step={('y','z','a','b','g'):100,('y','z'):100,('a','b','g'):0.01,('a',):0.1,('b',):0.1,('g',):0.1,'a':0.1,'b':0.1,'g':0.1}
+step={('y','z','a','b','g'):100,('y','z'):100,('a','b','g'):0.1,('a',):0.1,('b',):0.1,('g',):0.1,'a':0.1,'b':0.1,'g':0.1}
 stepx={'x':10**4,'y':10000.0,'z':10000.0,('y','z'):50.0}
 stepa={'a':0.1,'b':0.1,'g':0.1,('a','b','g'):0.1}
 gdbg=True
@@ -183,18 +186,20 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
           var[x]=y
         step[v]*=1.4        
        
+
 def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
   if cu!=None: Fcu=curry(F,cu)
   else: Fcu=F
   vd=map(lambda x:parsedag(x,{},var),d)
+  print "%s %e"%(v,vd[0])
   sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
   p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
   td={}
   dbg=False
   for e in var: td[e]=var[e]
   st=0.0
-  dr=step[v]*10.0
+  dr=step[v]*2.0
   for (x,y) in izip(v,p): td[x]=var[x]-y*st
   vst=parsedag(Fcu,{},td)
   for (x,y) in izip(v,p): td[x]=var[x]-y*dr
@@ -229,129 +234,6 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
         st,vst=mi,vmi
   step[v]=mi+1
   for (x,y) in izip(v,p): var[x]=var[x]-y*mi
-  return vmi
-
-def optmxbinall(F,d,var,v,vf,q=None,cu=None,stepup=None):
-  if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  sqrtx=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd[:2],q[:2]))))**0.5
-  px=map(lambda (x,y):x*y/sqrtx,izip(vd[:2],q[:2]))  
-  sqrta=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd[2:],q[2:]))))**0.5
-  pa=map(lambda (x,y):x*y/sqrta,izip(vd[2:],q[2:]))
-
-  td={}
-  dbg=False
-  stx=sta=0.0
-  vx=('y','z')
-  va=('a','b','g')
-  drx=step[vx]*2.0
-  dra=step[va]*2.0
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*stx
-  vstx=parsedag(Fcu,{},td)
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*drx
-  vdrx=parsedag(Fcu,{},td)
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*sta
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-  vsta=parsedag(Fcu,{},td)
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*dra
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-  vdra=parsedag(Fcu,{},td)
-
-  difx=(drx-stx)/10.0**5
-  difa=(dra-sta)/10.0**5
-  vmi=0
-
-  while stx+difx<drx and sta+difa<dra:
-    mix=(stx+drx)/2.0
-    mia=(sta+dra)/2.0
-
-    td=var.copy()
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*mix
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*mia
-    vmi=parsedag(Fcu,{},td)
-  
-    if dbg: print "[%e %e] (%e %e) [%e %e] (%e %e) {%e}"%(stx,drx,sta,dra,vstx,vdrx,vsta,vdra,vmi)
- 
-    if vmi > vstx and vmi > vdrx:
-      if vstx<vdrx:
-        if dbg: print "1"
-        drx=mix
-      else:
-        if dbg: print "2"
-        stx=mix
-    elif vmi<vstx and vmi<vdrx:
-      if vstx<vdrx:
-        if dbg: print "3"
-        drx=mix
-      else:
-        if dbg: print "4"
-        stx=mix
-    elif vmi<vstx or vmi<vdrx:
-      if vstx<vdrx:
-        if dbg: print "5"
-        drx=mix
-      else:
-        if dbg: print "6"
-        stx=mix
-
-    if vmi > vsta and vmi > vdra:
-      if vsta<vdra:
-        if dbg: print "1"
-        dra=mia
-      else:
-        if dbg: print "2"
-        sta=mia
-    elif vmi<vsta and vmi<vdra:
-      if vsta<vdra:
-        if dbg: print "3"
-        dra=mia
-      else:
-        if dbg: print "4"
-        sta=mia
-    elif vmi<vsta or vmi<vdra:
-      if vsta<vdra:
-        if dbg: print "5"
-        dra=mia
-      else:
-        if dbg: print "6"
-        sta=mia
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*stx
-    vstx=parsedag(Fcu,{},td)
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*drx
-    vdrx=parsedag(Fcu,{},td)
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*sta
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-    vsta=parsedag(Fcu,{},td)
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*dra
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-    vdra=parsedag(Fcu,{},td)
-
-  step[vx]=mix+1
-  step[va]=mia+0.01
-  for (x,y) in izip(vx,px): var[x]=var[x]-y*mix
-  for (x,y) in izip(va,pa): var[x]=var[x]-y*mia
   return vmi
 
 def optmabin(F,d,var,v,vf,q=None,cu=None,stepup=None):#o singura variabila
@@ -417,9 +299,36 @@ def resetstep():
   step[('g',)]=0.1
 
 def printshit(var,vf,j,mode=None):
-  print("%.1f %.1f (%.1f) %.4f %.4f %.4f (%.2e) %f %d mode %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,j,mode))
+  print("%.1f %.1f (%.1f) %.2f %.2f %.2f (%.2f) %f %d mode %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,j,mode))
 
-def minimize(F,dl,d2=None):
+def update_draw(*args):
+  print "hello"
+  time.sleep(1)
+
+def initialize_plot():
+  win=gtk.Window()
+  win.connect("destroy",gtk.main_quit) 
+  win.set_default_size(600,400)  
+  win.set_title("title")
+  fig=Figure()
+  ax=fig.add_subplot(111)
+  ax.set_xlim(0,30)
+  ax.set_ylim([0,100])
+  ax.set_autoscale_on(False)
+  canvas=FigureCanvas(fig)
+  win.add(canvas)
+  minimize()
+  gobject.idle_add(minimize)
+  win.show_all()
+  gtk.main()
+
+class sys:
+  def __init__(self.):  
+    (self.p1,self.p2,self.s,self.f)=readfile("points2.in")
+    vecpic(self.p1,self.s,self.f)  
+    (self.v1,self.v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
+
+  (s.F,s.dl)=system(v1,v2)
   mode=1
   var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
 #  var=randomize()
@@ -431,31 +340,24 @@ def minimize(F,dl,d2=None):
   dbg=True
   dbgmode=False
   dbgtime=False
-  while True:  
-    if clock()-tstart>60.0: 
-        printshit(var,vf,j,mode)
-        break
-
+  while True:
     if mode==1:
-      #vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
-      vf,pvf=optmxbin(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
+      vf,pvf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
       if dbg and gdbg and dbgmode:    
         print "mode 1"
       if dbg and gdbg:
         printshit(var,vf,j,mode)
-      if vf/pvf>0.999:
+      if vf/pvf>0.9999:
         if gdbg and dbgtime:
           print clock()-tstart 
-        mode=2     
-    elif mode==2:
+        mode=2      
+    else:
       pvf=vf
   
-      #vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
-      vf,pvf=optmxbin(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
-      #if j%2==0:
-      #  vf=crazymx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
-      #if j%2==1:
-      #  vf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
+      if j%2==0:
+        vf=crazymx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
+      if j%2==1:
+        vf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
       if j%3==0:
         cu=var.copy()
         del cu['a']
@@ -470,29 +372,14 @@ def minimize(F,dl,d2=None):
         (pdg,vf)=optmx2(F,(dl[5],),var,('g',),vf,cu=cu,stepup=1.0)
 
       j+=1
-      if dbg and gdbg and dbgmode:    
+      if dbg and gdbg:    
         print "mode 2"
-      if dbg and gdbg:
         printshit(var,vf,j,mode)
-#      if vf/pvf>0.9995:
-#        mode=3 
+      if clock()-tstart>60.0: 
+        printshit(var,vf,j,mode)
+        break
 
-    elif mode==3:
-      if gdbg and dbgtime:
-        print "mode 3 %d"%(clock()-tstart)
-      vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
-      if dbg and gdbg:
-        printshit(var,vf,j,mode)
-         
 
 if __name__=="__main__":
-  (p1,p2,s,f)=readfile("points2.in")
-  vecpic(p1,s,f)  
-  (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
-  (F,dl)=system(v1,v2)
-  minimize(F,dl)
+  initialize_plot()
 
-
-
-
-     

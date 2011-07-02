@@ -2,11 +2,8 @@
 from xpm import *
 from itertools import izip
 import sys
-from random import random
 xpm=Xpm(1000,1000)
 f=open("file.o","r")
-l=[]
-i=0
 
 for line in f:
   if len(line.split())>4 and i>2:
@@ -25,7 +22,7 @@ elif len(sys.argv)==4:
 else:
   sx=sy=10.0    
 for e,f in izip(l[st:-1],l[st+1:]):
-  xpm.drawLine(Point(ox+(e[0]-s[0])/sx,oy+(e[1]-s[1])/sy),Point(ox+(f[0]-s[0])/sx,oy+(f[1]-s[1])/sy),Color(0,int(random()*25)*10,0))
+  xpm.drawLine(Point(ox+(e[0]-s[0])/sx,oy+(e[1]-s[1])/sy),Point(ox+(f[0]-s[0])/sx,oy+(f[1]-s[1])/sy),Colorcolor)
   if color=="black":
     color="red"
   elif color=="red":
