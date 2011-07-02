@@ -172,7 +172,7 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
     if tvf>vf:
       for (x,y) in izip(v,tv):
         var[x]=y 
-      step[v]/=1.4
+      step[v]/=1.1
       stop=True
     else:
       if stop:
@@ -181,7 +181,7 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
       else:
         for (x,y) in izip(v,tv):
           var[x]=y
-        step[v]*=1.4        
+        step[v]*=1.1        
        
 def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
@@ -422,7 +422,7 @@ def printshit(var,vf,j,mode=None):
 def minimize(F,dl,d2=None):
   mode=1
   var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
-#  var=randomize()
+  var=randomize()
   print var
   print clock()-tstart
   j=0

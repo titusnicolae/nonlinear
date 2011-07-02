@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from mat import *
+from matx import *
 from math import log
 from random import random
 step={('y','z','a','b','g'):100,('y','z'):100}
@@ -157,12 +157,15 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-  dic={}
-  for e in ['a','b','g','x','y','z']:
-    dic[e]=random()*10
-  dl2=map(lambda x: prunedag(prune(dtold(F,x)),{}),['x','y','z','a','b','g'])
-  for (x,y) in izip(dl,dl2):
-    v1=parsedag(x,{},dic)  
-    v2=parsedag(y,{},dic)
-    print "%f %f %d"%(v1,v2,v1==v2) 
-   
+  print nops(F)
+  for e in dl:
+    print nops(e)
+  #dic={}
+  #for e in ['a','b','g','x','y','z']:
+  #  dic[e]=random()*10
+  #dl2=map(lambda x: prunedag(prune(dtold(F,x)),{}),['x','y','z','a','b','g'])
+  #for (x,y) in izip(dl,dl2):
+  #  v1=parsedag(x,{},dic)  
+  #  v2=parsedag(y,{},dic)
+  #  print "%f %f %d"%(v1,v2,v1==v2) 
+ #  

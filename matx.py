@@ -323,7 +323,13 @@ def mul(a,b):
       return [[mul(c,d) for c in map(list,zip(*a))] for d in b]
 
 def sq(a):
-  return mul(a,a)
+  if isList(a):
+    return reduce(lambda x,y:(qadd,x,y),[(qexp,x,2) for x in a])
+  if isElement(a):
+    return (qexp,a,2) 
+  else:
+    print "crap on a spatula"
+   
 
 def id():
   return [[1,0,0],[0,1,0],[0,0,1]]
