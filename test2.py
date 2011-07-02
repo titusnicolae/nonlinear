@@ -1,10 +1,6 @@
 #!/usr/bin/python2.6
 import psyco
+from random import random,seed
 #psyco.full()
-def f():
-  for i in xrange(1,100000000):
-    x=i*2
-
-if __name__=="__main__":
-  f()
-   
+seed(1)
+print random() 

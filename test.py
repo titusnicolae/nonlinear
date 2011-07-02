@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from matx import *
 from math import log
-from random import random
+from random import random,seed
 step={('y','z','a','b','g'):100,('y','z'):100}
 stepx={'x':10**4,'y':10000.0,'z':10000.0,('y','z'):50.0}
 stepa={'a':0.1,'b':0.1,'g':0.1,('a','b','g'):0.1}
@@ -157,9 +157,14 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
-  print nops(F)
+  seed(10)
+  d={'x':random(),'y':random(),'z':random(),'a':random(),'b':random(),'g':random()}
+#  print nops(F)
+#  for e in dl:
+#    print nops(e)
+  print parsedag(F,{},d)
   for e in dl:
-    print nops(e)
+    print parsedag(e,{},d)
   #dic={}
   #for e in ['a','b','g','x','y','z']:
   #  dic[e]=random()*10

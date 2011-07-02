@@ -249,7 +249,8 @@ def linsolve(m,c):
 #  for (i,e) in enumerate(m):
 #    r.append(div(det(rc(m,c,i)),d))
 #  return r
-  return div(det(rc(m,c,2)),det(m))
+  return div(sq(det(rc(m,c,2))),sq(det(m)))
+#  return div(sq(det(rc(m,c,2))),sq(det(m)))
  
 def f(x): #tofloat
   if isMatrix(x):
@@ -445,5 +446,5 @@ def delta(u,v,s,r):
   p=intersect(u,mul(rot(*r),v),s) 
 #  p=intersect(u,v,s) 
 #  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
-  return mul(sq(cross(u,mul(rot(*r),v))),sq(p))
-
+#  return mul(sq(cross(u,mul(rot(*r),v))),p)
+  return mul(sq(cross(u,mul(rot(*r),v))),p)
