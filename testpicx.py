@@ -422,7 +422,7 @@ def printshit(var,vf,j,mode=None):
 def minimize(F,dl,d2=None):
   mode=1
   var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
-  var=randomize()
+#  var=randomize()
   print var
   print clock()-tstart
   j=0

@@ -445,5 +445,5 @@ def delta(u,v,s,r):
   p=intersect(u,mul(rot(*r),v),s) 
 #  p=intersect(u,v,s) 
 #  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
-  return sq(mul(p,cross(u,mul(rot(*r),v))))
+  return mul(sq(cross(u,mul(rot(*r),v))),sq(p))
 
