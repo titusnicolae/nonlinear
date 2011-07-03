@@ -262,8 +262,12 @@ def f(x): #tofloat
 
 def cross(a,b):
   if isList(a,b):
-    t=map(list,zip(a,b))
-    return [det(t[1:]),minus(det([t[0],t[2]])),det(t[:2])] 
+    return [(qsub,(qmul,a[1],b[2]),(qmul,a[2],b[1])),
+            (qsub,(qmul,a[2],b[0]),(qmul,a[0],b[2])),
+            (qsub,(qmul,a[0],b[1]),(qmul,a[1],b[0]))]
+    
+   # t=map(list,zip(a,b))
+   # return [det(t[1:]),minus(det([t[0],t[2]])),det(t[:2])] 
       
   else:
     print("Error @ cross") 

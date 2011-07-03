@@ -292,6 +292,10 @@ def f(x): #tofloat
 
 def cross(a,b):
   if isList(a,b):
+    """return [(qsub,(qmul,a[1],b[2]),(qmul,a[2],b[1])),
+            (qsub,(qmul,a[2],b[0]),(qmul,a[0],b[2])),
+            (qsub,(qmul,a[0],b[1]),(qmul,a[1],b[0]))]
+    """
     t=map(list,zip(a,b))
     return [det(t[1:]),minus(det([t[0],t[2]])),det(t[:2])] 
       
@@ -382,22 +386,22 @@ def parsedag(x,dic,d=None,ct=None):
     elif isinstance(x,(tuple)):
       if x[0] in op:
         if x not in dic:
-          ct[x]=0
+          if ct!=None: ct[x]=0
 #          print "%d %s"%(nops(x),pr(x))
           a=parsedag(x[1],dic,d,ct=ct)
           b=parsedag(x[2],dic,d,ct=ct)
           dic[x]=x[0](a,b)
         else:
-          ct[x]+=1
+          if ct!=None: t[x]+=1
 #          print "%d %s"%(nops(x),pr(x))
         return dic[x]
       if x[0] in func:
         if x not in dic:
-          ct[x]=0
+          if ct!=None: ct[x]=0
           a=parsedag(x[1],dic,d,ct=ct) 
           dic[x]=x[0](a) 
         else:
-          ct[x]+=1
+          if ct!=None: ct[x]+=1
         return dic[x]
   elif isList(x):
     return [parsedag(e,dic,d,ct=ct) for e in x]   
@@ -484,8 +488,8 @@ def intersect2(u,v,s):
 
 def delta(u,v,s,r):
   cr=cross(u,mul(rot(*r),v))
-#  return div(sq(mul(cr,s)), 
-#             sq(cr))
-  return intersect2(u,mul(rot(*r),v),s) 
+  return div(sq(mul(cr,s)), 
+             sq(cr))
+#  return intersect2(u,mul(rot(*r),v),s) 
   
   

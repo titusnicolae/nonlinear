@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from matz import *
+from matx import *
 from math import log
 from random import random,seed
 step={('y','z','a','b','g'):100,('y','z'):100}
@@ -156,27 +156,27 @@ if __name__=="__main__":
   (F,dl)=system(v1,v2)
   seed(10)
   d={'x':random(),'y':random(),'z':random(),'a':random(),'b':random(),'g':random()}
-  
-  print parsedag(F,{},d,{}) 
+  print parsedag(F,{},d) 
   for e in dl:
-    print parsedag(e,{},d,{})
-#  print nops(F)
-#  for e in dl:
-#    print nops(e) 
- 
-  '''  ct=[0,0]
+    print parsedag(e,{},d)
+  print nops(F)
+  for e in dl:
+    print nops(e) 
+  """
+  ct=[0,0]
   qd={}
   ct={}
-  ff=dl[3]
+  ff=F#dl[0]
   parsedag(ff,qd,d,ct)
   qw=[]
   for e in qd:
     qw.append((nops(e),ct[e]))
-  qw=filter(lambda x:x[1]>1,qw)
+#  qw=filter(lambda x:x[1]>1,qw)
   ss=0
   for (a,b) in qw:
     ss+=a*(b)
-  print "%d %d %d"%(nops(ff),ss,nops(ff)-ss)'''
+  print "%d %d %d"%(nops(ff),ss,nops(ff)-ss)
+  """
 #  print sorted(qw,key=lambda x:x[0]) 
 #  for e in dl:
 #    ct=[0,0]
