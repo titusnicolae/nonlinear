@@ -4,21 +4,40 @@ from math import sin,cos
 #psyco.full()
 def qadd(a,b):
   return a+b
+  def __str__():
+    return "+"
 def qsub(a,b):
   return a-b
+  def __str__():
+    return "-"
 def qmul(a,b):
-  return a*b
+  return a*b  
+  def __str__():
+    return "-"
+
 def qdiv(a,b):
   return a/b
+  def __str__():
+    return "-"
+
 def qexp(a,b):
   return a**b 
+  def __str__():
+    return "-"
+
 def qsin(a):
   return sin(a)
+  def __str__():
+    return "-"
+
 def qcos(a):
   return cos(a)
+  def __str__():
+    return "-"
 op=(qmul,qdiv,qadd,qsub,qexp)
 func=(qcos,qsin)
-
+ctdag1=0
+ctdag2=0
 def dt(l,t):
   if isNumber(l):
     return 0
@@ -177,15 +196,23 @@ def pr(l):
   elif l[0] in op:
     r+="("+pr(l[1])
     if isinstance(l[0],(int,long,float)): r+=str(l[0])
-    else: r+=l[0]
+    else: r+=frepr(l[0])
     r+=pr(l[2])+")"
 
   elif l[0] in func:
-    r+=l[0]+"("
+    r+=frepr(l[0])+"( "
     r+=pr(l[1])
-    r+=")"
+    r+=" )"
   return r
 
+def frepr(f):
+  if f==qadd: return "+"
+  elif f==qsub: return "-"
+  elif f==qmul: return "*"
+  elif f==qdiv: return "/"  
+  elif f==qexp: return "^"
+  elif f==qsin: return "sin"
+  elif f==qcos: return "cos"
 def true(l):
   return reduce(lambda a,b:a and b,l)
 
@@ -249,8 +276,11 @@ def linsolve(m,c):
 #  for (i,e) in enumerate(m):
 #    r.append(div(det(rc(m,c,i)),d))
 #  return r
-  return div(sq(det(rc(m,c,2))),det(m))
+  return div(sq(det(rc(m,c,2))),sq(det(m)))
 #  return div(sq(det(rc(m,c,2))),sq(det(m)))
+
+def linsolve2(m,c):
+  return div(sq(det(rc(m,c,2))),det(m))
  
 def f(x): #tofloat
   if isMatrix(x):
@@ -342,7 +372,7 @@ def transpose(m):
       r[j].append(m[i][j])
   return r
 
-def parsedag(x,dic,d=None):
+def parsedag(x,dic,d=None,ct=None):
   if isElement(x):
     if isinstance(x,(int,long,float)):
       return x
@@ -352,26 +382,27 @@ def parsedag(x,dic,d=None):
     elif isinstance(x,(tuple)):
       if x[0] in op:
         if x not in dic:
-          a=parsedag(x[1],dic,d)
-          b=parsedag(x[2],dic,d)
+          ct[x]=0
+#          print "%d %s"%(nops(x),pr(x))
+          a=parsedag(x[1],dic,d,ct=ct)
+          b=parsedag(x[2],dic,d,ct=ct)
           dic[x]=x[0](a,b)
-#          if x[0]==qmul: dic[x]=a*b 
-#          elif x[0]==qadd: dic[x]=a+b 
-#          elif x[0]==qsub: dic[x]=a-b 
-#          elif x[0]==qdiv: dic[x]=a/b 
-#          elif x[0]==qexp: dic[x]=a**b
+        else:
+          ct[x]+=1
+#          print "%d %s"%(nops(x),pr(x))
         return dic[x]
       if x[0] in func:
         if x not in dic:
-          a=parsedag(x[1],dic,d)       
+          ct[x]=0
+          a=parsedag(x[1],dic,d,ct=ct) 
           dic[x]=x[0](a) 
-#          if x[0]==qsin:   dic[x]=sin(a)
-#          elif x[0]==qcos: dic[x]=cos(a)
+        else:
+          ct[x]+=1
         return dic[x]
   elif isList(x):
-    return [parsedag(e,dic,d) for e in x]   
+    return [parsedag(e,dic,d,ct=ct) for e in x]   
   elif isMatrix(x):
-    return [[parsedag(e,dic,d) for e in c] for c in x] 
+    return [[parsedag(e,dic,d,ct=ct) for e in c] for c in x] 
  
 def parse(x,d=None):
   if isElement(x):
@@ -442,11 +473,19 @@ def rot(a,b,g):
 def intersect(u,v,s):
   return linsolve([u,v,cross(u,v)],s)
 
-def delta(u,v,s,r):
-  cr=cross(u,mul(rot(*r),v))
-  return div(sq(mul(cr,s)), sq(cr))
-#   return intersect(u,mul(rot(*r),v),s) 
+def intersect2(u,v,s):
+  return linsolve2([u,v,cross(u,v)],s)
+
+#def delta(u,v,s,r):
+#  p=intersect(u,mul(rot(*r),v),s) 
 #  p=intersect(u,v,s) 
 #  return sq(sub(sub(mul(p[0],u),s),mul(p[1],mul(rot(*r),v))))
 #  return mul(sq(cross(u,mul(rot(*r),v))),p)
-#  return mul(sq(cross(u,mul(rot(*r),v))),p)
+
+def delta(u,v,s,r):
+  cr=cross(u,mul(rot(*r),v))
+#  return div(sq(mul(cr,s)), 
+#             sq(cr))
+  return intersect2(u,mul(rot(*r),v),s) 
+  
+  

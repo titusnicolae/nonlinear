@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from matx import *
+from matz import *
 from math import log
 from random import random,seed
 step={('y','z','a','b','g'):100,('y','z'):100}
@@ -124,9 +124,6 @@ def opta(F,d,var,v,vf):
   return tvf
  
 def minimize(F,dl):
-#  var={'x':10000.0,'y':4035.0,'z':-13050.1,'a':6.4,'b':-3.1,'g':-0.3} #9.141
-#  var={'x':10000.0,'y':-286.3,'z':5048.3,'a':4.7,'b':-3.2,'g':-1.6} #
-#  var={'x':10000.0,'y':1961.8,'z':-9239,'a':-0.2,'b':0.9,'g':0.4} #967.5
 #  var={'x':10000.0,'y':5912.5,'z':-17051.1,'a':-0.7,'b':0.9,'g':0.3} #864
   var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
   i=0
@@ -159,12 +156,32 @@ if __name__=="__main__":
   (F,dl)=system(v1,v2)
   seed(10)
   d={'x':random(),'y':random(),'z':random(),'a':random(),'b':random(),'g':random()}
+  
+  print parsedag(F,{},d,{}) 
+  for e in dl:
+    print parsedag(e,{},d,{})
 #  print nops(F)
 #  for e in dl:
-#    print nops(e)
-  print parsedag(F,{},d)
-  for e in dl:
-    print parsedag(e,{},d)
+#    print nops(e) 
+ 
+  '''  ct=[0,0]
+  qd={}
+  ct={}
+  ff=dl[3]
+  parsedag(ff,qd,d,ct)
+  qw=[]
+  for e in qd:
+    qw.append((nops(e),ct[e]))
+  qw=filter(lambda x:x[1]>1,qw)
+  ss=0
+  for (a,b) in qw:
+    ss+=a*(b)
+  print "%d %d %d"%(nops(ff),ss,nops(ff)-ss)'''
+#  print sorted(qw,key=lambda x:x[0]) 
+#  for e in dl:
+#    ct=[0,0]
+#    parsedag(e,{},d,ct)
+#    print "%d %s"%(nops(e),ct)
   #dic={}
   #for e in ['a','b','g','x','y','z']:
   #  dic[e]=random()*10
