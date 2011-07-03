@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from matx import *
+from matz import *
 from math import log
 from random import random,seed
 step={('y','z','a','b','g'):100,('y','z'):100}
@@ -156,9 +156,10 @@ if __name__=="__main__":
   (F,dl)=system(v1,v2)
   seed(10)
   d={'x':random(),'y':random(),'z':random(),'a':random(),'b':random(),'g':random()}
+  """
   print parsedag(F,{},d) 
   for e in dl:
-    print parsedag(e,{},d)
+    print parsedag(e,{},d)"""
   print nops(F)
   for e in dl:
     print nops(e) 
@@ -166,7 +167,7 @@ if __name__=="__main__":
   ct=[0,0]
   qd={}
   ct={}
-  ff=F#dl[0]
+  ff=curry(dl[0],{'a':1.0,'b':1.0,'g':1.0})
   parsedag(ff,qd,d,ct)
   qw=[]
   for e in qd:
@@ -175,8 +176,12 @@ if __name__=="__main__":
   ss=0
   for (a,b) in qw:
     ss+=a*(b)
-  print "%d %d %d"%(nops(ff),ss,nops(ff)-ss)
-  """
+  print "%d %d %d"%(nops(ff),ss,nops(ff)-ss)"""
+  #r=rot('a','b','g')
+  #r[0][0]=(qdiv,(qadd,(qcos,(qsub,'b','g')),(qcos,(qadd,'b','g'))),2) 
+  #print parse(r,d) 
+
+
 #  print sorted(qw,key=lambda x:x[0]) 
 #  for e in dl:
 #    ct=[0,0]

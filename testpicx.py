@@ -468,11 +468,11 @@ def minimize(F,dl,d2=None):
         cu=var.copy()
         del cu['g']
         (pdg,vf)=optmx2(F,(dl[5],),var,('g',),vf,stepup=1.0)
-
+      
       j+=1
       if dbg and gdbg and dbgmode:    
         print "mode 2"
-      if dbg and gdbg:
+      if j%2 and dbg and gdbg:
         printshit(var,vf,j,mode)
 #      if vf/pvf>0.9995:
 #        mode=3 

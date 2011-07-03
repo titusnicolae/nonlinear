@@ -371,7 +371,7 @@ def parsedag(x,dic,d=None):
           dic[x]=x[0](a) 
 #          if x[0]==qsin:   dic[x]=sin(a)
 #          elif x[0]==qcos: dic[x]=cos(a)
-        return dic[x]
+        return dic[x] 
   elif isList(x):
     return [parsedag(e,dic,d) for e in x]   
   elif isMatrix(x):

@@ -190,29 +190,41 @@ def prune(l):
 
 def pr(l):
   r=""
-  if not isinstance(l,(tuple)):
+   
+  if isNumber(l): 
     r+=str(l)
-     
+  elif isMatrix(l):
+    r="["
+    for e in l:
+      r+=pr(e)+','
+    r+="]"
+  elif isList(l):
+    r="["
+    for e in l:
+      r+=pr(e)+',\n'
+    r+="]\n"
+
+
   elif l[0] in op:
-    r+="("+pr(l[1])
-    if isinstance(l[0],(int,long,float)): r+=str(l[0])
-    else: r+=frepr(l[0])
+    r+=" ("+pr(l[1])
+    r+=" "+frepr(l[0])
     r+=pr(l[2])+")"
 
   elif l[0] in func:
-    r+=frepr(l[0])+"( "
-    r+=pr(l[1])
-    r+=" )"
+    r+=" "+frepr(l[0])+"("
+    r+=l[1]
+    r+=")"
   return r
 
 def frepr(f):
-  if f==qadd: return "+"
-  elif f==qsub: return "-"
-  elif f==qmul: return "*"
-  elif f==qdiv: return "/"  
-  elif f==qexp: return "^"
-  elif f==qsin: return "sin"
-  elif f==qcos: return "cos"
+  if f==op[2]: return "+"
+  elif f==op[3]: return "-"
+  elif f==op[0]: return "*"
+  elif f==op[1]: return "/"  
+  elif f==op[4]: return "^"
+  elif f==func[1]: return "sin"
+  elif f==func[0]: return "cos"
+  print "ce pula mea"
 def true(l):
   return reduce(lambda a,b:a and b,l)
 
@@ -292,10 +304,10 @@ def f(x): #tofloat
 
 def cross(a,b):
   if isList(a,b):
-    """return [(qsub,(qmul,a[1],b[2]),(qmul,a[2],b[1])),
+    return [(qsub,(qmul,a[1],b[2]),(qmul,a[2],b[1])),
             (qsub,(qmul,a[2],b[0]),(qmul,a[0],b[2])),
             (qsub,(qmul,a[0],b[1]),(qmul,a[1],b[0]))]
-    """
+    
     t=map(list,zip(a,b))
     return [det(t[1:]),minus(det([t[0],t[2]])),det(t[:2])] 
       
@@ -392,7 +404,7 @@ def parsedag(x,dic,d=None,ct=None):
           b=parsedag(x[2],dic,d,ct=ct)
           dic[x]=x[0](a,b)
         else:
-          if ct!=None: t[x]+=1
+          if ct!=None: ct[x]+=1
 #          print "%d %s"%(nops(x),pr(x))
         return dic[x]
       if x[0] in func:
@@ -471,8 +483,10 @@ def rot(a,b,g):
       [Sin(b),0,Cos(b)]]
   rg=[[Cos(g),Sin(g),0],
       [minus(Sin(g)),Cos(g),0],
-      [0,0,1]] 
-  return mul(ra,mul(rb,rg))
+      [0,0,1]]  
+  r=mul(ra,mul(rb,rg))
+#  r[0][0]=(qdiv,(qadd,(qcos,(qsub,'b','g')),(qcos,(qadd,'b','g'))),2)
+  return r
 
 def intersect(u,v,s):
   return linsolve([u,v,cross(u,v)],s)
