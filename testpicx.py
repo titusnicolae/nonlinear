@@ -421,7 +421,7 @@ def printshit(var,vf,j,mode=None):
 
 def minimize(F,dl,d2=None):
   mode=1
-  var={'x':10000.0,'y':-5912.5,'z':17051.1,'a':0.7,'b':-0.9,'g':0.3} #864
+  var={'x':10000.0,'y':-897,'z':3215.7,'a':0.02687,'b':-0.548,'g':-0.1927} #864
 #  var=randomize()
   print var
   print clock()-tstart
@@ -432,7 +432,7 @@ def minimize(F,dl,d2=None):
   dbgmode=False
   dbgtime=False
   while True:  
-    if clock()-tstart>60.0: 
+    if clock()-tstart>6000.0: 
         printshit(var,vf,j,mode)
         break
 
@@ -486,7 +486,7 @@ def minimize(F,dl,d2=None):
          
 
 if __name__=="__main__":
-  (p1,p2,s,f)=readfile("points2.in")
+  (p1,p2,s,f)=readfile("points3.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl)=system(v1,v2)
