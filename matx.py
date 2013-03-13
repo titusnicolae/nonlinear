@@ -15,7 +15,7 @@ def qexp(a,b):
 def qsin(a):
   return sin(a)
 def qcos(a):
-  return cos(a)
+	return cos(a)
 op=(qmul,qdiv,qadd,qsub,qexp)
 func=(qcos,qsin)
 

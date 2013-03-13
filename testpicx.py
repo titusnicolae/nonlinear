@@ -53,7 +53,7 @@ def system(v1,v2,d2=None):
     d2=map(lambda x,y:prunedag(prune(dt(x,y)),{}),dl,s+r) 
     return (F,dl,d2)
   else:
-    return (F,dl)
+    return (F,dl,d)
 #  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
 
 def optm(F,d,var,v,vf,q=None,cu=None,stepup=None):
@@ -132,6 +132,12 @@ def crazymx(F,d,var,v,vf,q=None,cu=None,stepup=None):
     var[x]=y
   if dbg and gdbg: print "damn"
   return vf
+
+#def printPartial(tree,depth=None): #
+#  if depth==None:
+#    return printPartial(tree,0)  
+#  else:
+#    print tree
 
 def optmx(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
@@ -417,11 +423,13 @@ def resetstep():
   step[('g',)]=0.1
 
 def printshit(var,vf,j,mode=None):
-  print("%.1f %.1f (%.1f) %.4f %.4f %.4f (%.2e) %f %d mode %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],(vf/6.0)**0.5,j,mode))
+	print("%.4f %.4f (%.4f) %.6f %.6f %.6f (%.6e) %f %d mode %d"%(var['y'],var['z'],step[('y','z')],var['a'],var['b'],var['g'],step[('a','b','g')],((vf)**0.5)/6.0,j,mode))
 
-def minimize(F,dl,d2=None):
+def minimize(F,dl,deltaList):
   mode=1
-  var={'x':10000.0,'y':-897,'z':3215.7,'a':0.02687,'b':-0.548,'g':-0.1927} #864
+  #var={'x':10000.0,'y':-1683.3819,'z':3601.4280,'a':-0.0736,'b':-0.5574,'g':-0.2129} 
+  var={'x':10000.0,'y':0.0,'z':0.0,'a':0.0,'b':0.0,'g':0.0} 
+#864
 #  var=randomize()
   print var
   print clock()-tstart
@@ -431,7 +439,12 @@ def minimize(F,dl,d2=None):
   dbg=True
   dbgmode=False
   dbgtime=False
-  while True:  
+  deltaEval=[]
+  while True:
+   # deltaEval=[]
+ #   for x in deltaList: 
+  #    deltaEval.append(parsedag(x,{},var))
+#    print("%06.6f %06.6f %06.6f %06.6f %06.6f %06.6f"%(deltaEval[0],deltaEval[1],deltaEval[2],deltaEval[3],deltaEval[4],deltaEval[5]))  
     if clock()-tstart>6000.0: 
         printshit(var,vf,j,mode)
         break
@@ -486,13 +499,8 @@ def minimize(F,dl,d2=None):
          
 
 if __name__=="__main__":
-  (p1,p2,s,f)=readfile("points3.in")
+  (p1,p2,s,f)=readfile("livingroomx.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
-  (F,dl)=system(v1,v2)
-  minimize(F,dl)
-
-
-
-
-     
+  (F,dl,deltaList)=system(v1,v2) 
+  minimize(F,dl,deltaList)
