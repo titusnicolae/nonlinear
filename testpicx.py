@@ -428,7 +428,7 @@ def printshit(var,vf,j,mode=None):
 def minimize(F,dl,deltaList):
   mode=1
   #var={'x':10000.0,'y':-1683.3819,'z':3601.4280,'a':-0.0736,'b':-0.5574,'g':-0.2129} 
-  var={'x':10000.0,'y':0.0,'z':0.0,'a':0.0,'b':0.0,'g':0.0} 
+  var={'x':10000.0,'y':0.0,'z':0.0,'a':0.0,'b':-1.0,'g':0.0} 
 #864
 #  var=randomize()
   print var
@@ -499,7 +499,7 @@ def minimize(F,dl,deltaList):
          
 
 if __name__=="__main__":
-  (p1,p2,s,f)=readfile("livingroomx.in")
+  (p1,p2,s,f)=readfile("livingroomx-roty.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl,deltaList)=system(v1,v2) 
