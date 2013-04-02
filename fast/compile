@@ -1,0 +1,1 @@
+python nonlinear-setup.py build_ext -i

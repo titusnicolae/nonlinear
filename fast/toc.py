@@ -4,6 +4,7 @@ from math import log
 from random import random
 from time import clock
 import psyco
+import nonlinear
 psyco.bind(parsedag)
 psyco.bind(curry)
 tstart=clock()
@@ -186,7 +187,8 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
   while True: 
     for (x,y) in izip(v,p):
       var[x]-=y*step[v]
-    tvf=parsedag(Fcu,{},var)
+    #tvf=parsedag(Fcu,{},var)
+    tvf=nonlinear.delta(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])
     if tvf>vf:
       for (x,y) in izip(v,tv):
         var[x]=y 
@@ -214,15 +216,22 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   st=0.0
   dr=step[v]*10.0
   for (x,y) in izip(v,p): td[x]=var[x]-y*st
-  vst=parsedag(Fcu,{},td)
+  #vst=parsedag(Fcu,{},td)
+  vst=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+#  print vst,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
   for (x,y) in izip(v,p): td[x]=var[x]-y*dr
-  vdr=parsedag(Fcu,{},td)
+  #vdr=parsedag(Fcu,{},td)
+  vdr=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+#  print vst,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+#  print vdr,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
   dif=(dr-st)/10.0**5
   vmi=0
   while st+dif<dr:
     mi=(st+dr)/2.0
     for (x,y) in izip(v,p): td[x]=var[x]-y*mi
-    vmi=parsedag(Fcu,{},td)
+    #vmi=parsedag(Fcu,{},td)
+    vmi=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+#    print vmi,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
     if dbg: print "%e %e %e %e %e %e"%(st,mi,dr,vst,vmi,vdr)
     if vmi > vst and vmi > vdr:
       if vst<vdr:
@@ -559,13 +568,13 @@ if __name__=="__main__":
   (p1,p2,s,f)=readfile("synthetic1.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
-  (F,_,_)=system(v1,v2) 
+  (F,dl,deltaList)=system(v1,v2) 
+  """
   vec={}
   fin={}
   index=[0]
   ptoc(F,{},{},fin,vec,index)
 
-  """
   for i in vec:
     s=term(i)+"="
     if vec[i][0]==0:
@@ -588,8 +597,8 @@ if __name__=="__main__":
         s+="pow("+term(vec[i][2])+","+term(vec[i][3])+")"
     s+=";"
     print s
-  """
   for _ in xrange(1000):
     parsedag(F,{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  """
 
-#  minimize(F,dl,deltaList)
+  minimize(F,dl,deltaList)
