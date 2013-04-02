@@ -99,8 +99,8 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
        
 def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
+#  if cu!=None: Fcu=curry(F,cu)
+ # else: Fcu=F
 #  vd=map(lambda x:parsedag(x,{},var),d)
   vd=[nonlinear.d1(var['a'],var['b'],var['g'],var['x'],var['y'],var['z']),
             nonlinear.d2(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
@@ -320,3 +320,4 @@ if __name__=="__main__":
   #  parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
 
   minimize(F,dl,deltaList)
+  minimize([],[],[])
