@@ -559,12 +559,13 @@ if __name__=="__main__":
   (p1,p2,s,f)=readfile("synthetic1.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
-  F=system2(v1,v2) 
+  (F,_,_)=system(v1,v2) 
   vec={}
   fin={}
   index=[0]
   ptoc(F,{},{},fin,vec,index)
-  
+
+  """
   for i in vec:
     s=term(i)+"="
     if vec[i][0]==0:
@@ -587,6 +588,8 @@ if __name__=="__main__":
         s+="pow("+term(vec[i][2])+","+term(vec[i][3])+")"
     s+=";"
     print s
-  print parsedag(F,{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-#  minimize(F,dl,deltaList)
+  """
+  for _ in xrange(1000):
+    parsedag(F,{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
 
+#  minimize(F,dl,deltaList)
