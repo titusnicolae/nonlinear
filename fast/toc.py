@@ -56,6 +56,18 @@ def system(v1,v2,d2=None):
     return (F,dl,d)
 #  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
 
+def system2(v1,v2,d2=None):
+  d=[]
+  s=['x','y','z']
+  r=['a','b','g']
+  for (p1,p2) in izip(v1,v2):
+    d.append(delta(p1,p2,s,r))
+
+  F=prunedag(d[0],{})
+  return F
+#  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
+
+
 def optm(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
   if cu!=None: Fcu=curry(F,cu)
@@ -499,11 +511,82 @@ def minimize(F,dl,deltaList):
       vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
       if dbg and gdbg:
         printshit(var,vf,j,mode)
-         
+
+def qstr(q):
+  if q==qcos:    return 0 
+  elif q==qsin:  return 1 
+  elif q==qadd:  return 2
+  elif q==qsub:  return 3 
+  elif q==qmul:  return 4 
+  elif q==qdiv:  return 5 
+  elif q==qexp:  return 6 
+  
+def ptoc(x,dic,d={},fin={},vec={},index=[]):
+  if isElement(x):
+    if isinstance(x,(int,long,float)):
+      if x not in fin:
+        vec[index[0]]=(0,x)
+        fin[x]=index[0] 
+        index[0]+=1
+      return fin[x] 
+    elif isinstance(x,(basestring)):
+      if x not in fin:
+        vec[index[0]]=(0,x)
+        fin[x]=index[0]
+        index[0]+=1 
+      return fin[x] 
+    elif isinstance(x,(tuple)):
+      if x[0] in op:
+        if x not in fin:
+          vec[index[0]]=(2,qstr(x[0]),str(ptoc(x[1],dic,d,fin,vec,index)),str(ptoc(x[2],dic,d,fin,vec,index)))
+          fin[x]=index[0] 
+          index[0]+=1
+        return fin[x]
+      if x[0] in func:
+        if x not in fin:
+          vec[index[0]]=(1,qstr(x[0]),ptoc(x[1],dic,d,fin,vec,index))
+          fin[x]=index[0] 
+          index[0]+=1 
+        return fin[x] 
+  elif isList(x):
+    print "list"
+  elif isMatrix(x):
+    print "list"
+def term(i):
+  return "v["+str(i)+"]"
 
 if __name__=="__main__":
   (p1,p2,s,f)=readfile("synthetic1.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
-  (F,dl,deltaList)=system(v1,v2) 
-  minimize(F,dl,deltaList)
+  F=system2(v1,v2) 
+  vec={}
+  fin={}
+  index=[0]
+  ptoc(F,{},{},fin,vec,index)
+  
+  for i in vec:
+    s=term(i)+"="
+    if vec[i][0]==0:
+      s+=str(vec[i][1])
+    elif vec[i][0]==1:
+      if vec[i][1]==0:
+        s+="cos("+term(vec[i][2])+")"
+      elif vec[i][1]==1:
+        s+="sin("+term(vec[i][2])+")"
+    elif vec[i][0]==2:
+      if vec[i][1]==2:
+        s+=term(vec[i][2])+"+"+term(vec[i][3])
+      if vec[i][1]==3:
+        s+=term(vec[i][2])+"-"+term(vec[i][3])
+      if vec[i][1]==4:
+        s+=term(vec[i][2])+"*"+term(vec[i][3])
+      if vec[i][1]==5:
+        s+=term(vec[i][2])+"/"+term(vec[i][3])
+      if vec[i][1]==6:
+        s+="pow("+term(vec[i][2])+","+term(vec[i][3])+")"
+    s+=";"
+    print s
+  print parsedag(F,{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+#  minimize(F,dl,deltaList)
+
