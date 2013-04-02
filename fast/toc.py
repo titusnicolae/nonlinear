@@ -177,6 +177,7 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if cu!=None: Fcu=curry(F,cu)
   else: Fcu=F
   vd=map(lambda x:parsedag(x,{},var),d)
+  print vd
   try:
     sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
   except:
@@ -569,12 +570,11 @@ if __name__=="__main__":
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl,deltaList)=system(v1,v2) 
-  """
   vec={}
   fin={}
   index=[0]
-  ptoc(F,{},{},fin,vec,index)
-
+  ptoc(dl[5],{},{},fin,vec,index)
+  """
   for i in vec:
     s=term(i)+"="
     if vec[i][0]==0:
@@ -597,8 +597,15 @@ if __name__=="__main__":
         s+="pow("+term(vec[i][2])+","+term(vec[i][3])+")"
     s+=";"
     print s
-  for _ in xrange(1000):
-    parsedag(F,{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  """
+  """ 
+      
+  #for i in xrange(1000):
+  #  parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  print parsedag(dl[0],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  print parsedag(dl[1],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  print parsedag(dl[2],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  print parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  print parsedag(dl[4],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+  print parsedag(dl[5],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
 
-  minimize(F,dl,deltaList)
+# minimize(F,dl,deltaList)
