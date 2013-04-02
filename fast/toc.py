@@ -57,127 +57,20 @@ def system(v1,v2,d2=None):
     return (F,dl,d)
 #  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
 
-def system2(v1,v2,d2=None):
-  d=[]
-  s=['x','y','z']
-  r=['a','b','g']
-  for (p1,p2) in izip(v1,v2):
-    d.append(delta(p1,p2,s,r))
-
-  F=prunedag(d[0],{})
-  return F
-#  dl=map(lambda x: dt(F,x),['x','y','z','a','b','g'])
-
-
-def optm(F,d,var,v,vf,q=None,cu=None,stepup=None):
-  if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  dbg=False 
-  if dbg and gdbg: print "%s %e"%(v,vd[0])
-  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
-  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
-  tv=[var[x] for x in v]
-  while True: 
-    for (x,y) in izip(v,p):
-      var[x]-=y*step[v]
-    tvf=parsedag(Fcu,{},var)
-    if tvf>vf:
-      for (x,y) in izip(v,tv):
-        var[x]=y 
-      step[v]/=1.5
-    else:
-      step[v]*=stepup
-      return tvf
-
-
-def optmd2(F,d,d2,var,v,vf,stepup=None):
-  vd =parsedag(d,{},var)
-  vd2=parsedag(d2,{},var)
-  if vd2>0:
-    var[v]-=vd/vd2
-    step[v]=vd/vd2
-    print "yeah %f" %(vd/vd2)
-    return parsedag(F,{},var)
-  tv=var[v]
-  while True: 
-    var[v]-=step[v]
-    tvf=parsedag(F,{},var)
-    if tvf>vf:
-      var[v]=tv 
-      step[v]/=1.5
-    else:
-      step[v]*=stepup
-      return tvf
-
-def crazymx(F,d,var,v,vf,q=None,cu=None,stepup=None):
-  dbg=False
-  if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
-  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
-  tvv=[var[x] for x in v]
-  for (x,y) in izip(v,p):
-    var[x]-=y*step[v] 
-   
-  vd=map(lambda x:parsedag(x,{},var),d)
-  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
-  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
-  tv=[var[x] for x in v]
-  i=0
-  step2[('y','z')]=step[('y','z')]*4
-  while True and i<100: 
-    i+=1
-    for (x,y) in izip(v,p):
-      var[x]-=y*step2[v]
-    tvf=parsedag(Fcu,{},var)
-    if tvf>vf:
-      for (x,y) in izip(v,tv):
-        var[x]=y 
-      step2[v]/=1.2
-    else:
-      step2[v]*=2.0
-      return tvf
-  for (x,y) in izip(v,tvv):
-    var[x]=y
-  if dbg and gdbg: print "damn"
-  return vf
-
-#def printPartial(tree,depth=None): #
-#  if depth==None:
-#    return printPartial(tree,0)  
-#  else:
-#    print tree
-
-def optmx(F,d,var,v,vf,q=None,cu=None,stepup=None):
-  if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
-  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
-  tv=[var[x] for x in v]
-  while True: 
-    for (x,y) in izip(v,p):
-      var[x]-=y*step[v]
-    tvf=parsedag(Fcu,{},var)
-    if tvf>vf:
-      for (x,y) in izip(v,tv):
-        var[x]=y 
-      step[v]/=1.1
-    else:
-      step[v]*=stepup
-      return tvf
 
 def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
   if cu!=None: Fcu=curry(F,cu)
   else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  print vd
+  
+  if   v[0]=='a':
+    vd=[nonlinear.d3(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+  elif v[0]=='b':
+    vd=[nonlinear.d4(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+  elif v[0]=='g':
+    vd=[nonlinear.d5(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+#  vd=map(lambda x:parsedag(x,{},var),d)
+##  print vd,vdq
   try:
     sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
   except:
@@ -208,7 +101,10 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   if q==None: q=[1.0]*len(d)
   if cu!=None: Fcu=curry(F,cu)
   else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
+#  vd=map(lambda x:parsedag(x,{},var),d)
+  vd=[nonlinear.d1(var['a'],var['b'],var['g'],var['x'],var['y'],var['z']),
+            nonlinear.d2(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+
   sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
   p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
   td={}
@@ -219,20 +115,15 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   for (x,y) in izip(v,p): td[x]=var[x]-y*st
   #vst=parsedag(Fcu,{},td)
   vst=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
-#  print vst,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
   for (x,y) in izip(v,p): td[x]=var[x]-y*dr
   #vdr=parsedag(Fcu,{},td)
   vdr=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
-#  print vst,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
-#  print vdr,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
   dif=(dr-st)/10.0**5
   vmi=0
   while st+dif<dr:
     mi=(st+dr)/2.0
     for (x,y) in izip(v,p): td[x]=var[x]-y*mi
-    #vmi=parsedag(Fcu,{},td)
     vmi=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
-#    print vmi,nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
     if dbg: print "%e %e %e %e %e %e"%(st,mi,dr,vst,vmi,vdr)
     if vmi > vst and vmi > vdr:
       if vst<vdr:
@@ -259,175 +150,7 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   for (x,y) in izip(v,p): var[x]=var[x]-y*mi
   return vmi
 
-def optmxbinall(F,d,var,v,vf,q=None,cu=None,stepup=None):
-  if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  sqrtx=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd[:2],q[:2]))))**0.5
-  px=map(lambda (x,y):x*y/sqrtx,izip(vd[:2],q[:2]))  
-  sqrta=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd[2:],q[2:]))))**0.5
-  pa=map(lambda (x,y):x*y/sqrta,izip(vd[2:],q[2:]))
 
-  td={}
-  dbg=False
-  stx=sta=0.0
-  vx=('y','z')
-  va=('a','b','g')
-  drx=step[vx]*2.0
-  dra=step[va]*2.0
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*stx
-  vstx=parsedag(Fcu,{},td)
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*drx
-  vdrx=parsedag(Fcu,{},td)
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*sta
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-  vsta=parsedag(Fcu,{},td)
-
-  td=var.copy()
-  for (x,y) in izip(va,pa): td[x]=var[x]-y*dra
-  for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-  vdra=parsedag(Fcu,{},td)
-
-  difx=(drx-stx)/10.0**5
-  difa=(dra-sta)/10.0**5
-  vmi=0
-
-  while stx+difx<drx and sta+difa<dra:
-    mix=(stx+drx)/2.0
-    mia=(sta+dra)/2.0
-
-    td=var.copy()
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*mix
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*mia
-    vmi=parsedag(Fcu,{},td)
-  
-    if dbg: print "[%e %e] (%e %e) [%e %e] (%e %e) {%e}"%(stx,drx,sta,dra,vstx,vdrx,vsta,vdra,vmi)
- 
-    if vmi > vstx and vmi > vdrx:
-      if vstx<vdrx:
-        if dbg: print "1"
-        drx=mix
-      else:
-        if dbg: print "2"
-        stx=mix
-    elif vmi<vstx and vmi<vdrx:
-      if vstx<vdrx:
-        if dbg: print "3"
-        drx=mix
-      else:
-        if dbg: print "4"
-        stx=mix
-    elif vmi<vstx or vmi<vdrx:
-      if vstx<vdrx:
-        if dbg: print "5"
-        drx=mix
-      else:
-        if dbg: print "6"
-        stx=mix
-
-    if vmi > vsta and vmi > vdra:
-      if vsta<vdra:
-        if dbg: print "1"
-        dra=mia
-      else:
-        if dbg: print "2"
-        sta=mia
-    elif vmi<vsta and vmi<vdra:
-      if vsta<vdra:
-        if dbg: print "3"
-        dra=mia
-      else:
-        if dbg: print "4"
-        sta=mia
-    elif vmi<vsta or vmi<vdra:
-      if vsta<vdra:
-        if dbg: print "5"
-        dra=mia
-      else:
-        if dbg: print "6"
-        sta=mia
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*stx
-    vstx=parsedag(Fcu,{},td)
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*(dra-sta)/2.0
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*drx
-    vdrx=parsedag(Fcu,{},td)
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*sta
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-    vsta=parsedag(Fcu,{},td)
-
-    td=var.copy()
-    for (x,y) in izip(va,pa): td[x]=var[x]-y*dra
-    for (x,y) in izip(vx,px): td[x]=var[x]-y*(drx-stx)/2.0
-    vdra=parsedag(Fcu,{},td)
-
-  step[vx]=mix+1
-  step[va]=mia+0.01
-  for (x,y) in izip(vx,px): var[x]=var[x]-y*mix
-  for (x,y) in izip(va,pa): var[x]=var[x]-y*mia
-  return vmi
-
-def optmabin(F,d,var,v,vf,q=None,cu=None,stepup=None):#o singura variabila
-  if q==None: q=[1.0]*len(d)
-  if cu!=None: Fcu=curry(F,cu)
-  else: Fcu=F
-  vd=map(lambda x:parsedag(x,{},var),d)
-  print "%s %e"%(v,vd[0])
-  sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
-  p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
-  td={}
-  for e in var: td[e]=var[e]
-  st=0.0
-  dr=step[v]*3.0
-  for (x,y) in izip(v,p): td[x]=var[x]-y*st
-  vst=parsedag(Fcu,{},td)
-  for (x,y) in izip(v,p): td[x]=var[x]-y*dr
-  vdr=parsedag(Fcu,{},td)
-  dif=(dr-st)/10.0**6
-  while st+dif<dr: 
-    mi=(st+dr)/2.0
-    for (x,y) in izip(v,p): td[x]=var[x]-y*mi
-    vmi=parsedag(Fcu,{},td)
-    if vmi > vst and vmi > vdr:
-      if vst<vdr:
-        dr,vdr=mi,vmi
-      else:
-        st,vst=mi,vmi
-    elif vmi<vst and vmi<vdr:
-      if vst<vdr:
-        dr,vdr=mi,vmi
-      else:
-        st,vst=mi,vmi
-    elif vmi<vst or vmi<vdr:
-      if vst<vdr:
-        dr,vdr=mi,vmi  
-      else:
-        st,vst=mi,vmi
-  step[v]=mi+1
-  for (x,y) in izip(v,p): var[x]=var[x]-y*mi
-  return vmi
-def sgn(x):
-  if x>=0: return 1
-  else: return u
-
-def score(s):
-  return (s/6.0)**0.5 
- 
 def randomize():
   var={}
   var['x']=10000.0
@@ -475,7 +198,6 @@ def minimize(F,dl,deltaList):
         break
 
     if mode==1:
-      #vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
       vf,pvf=optmxbin(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
       if dbg and gdbg and dbgmode:    
         print "mode 1"
@@ -488,12 +210,7 @@ def minimize(F,dl,deltaList):
     elif mode==2:
       pvf=vf
   
-      #vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
       vf,pvf=optmxbin(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0),vf
-      #if j%2==0:
-      #  vf=crazymx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
-      #if j%2==1:
-      #  vf=optmx(F,(dl[1],dl[2]),var,('y','z'),vf,cu={'a':var['a'],'b':var['b'],'g':var['g'],'x':var['x']},stepup=2.0)
       if j%3==0:
         cu=var.copy()
         del cu['a']
@@ -514,14 +231,14 @@ def minimize(F,dl,deltaList):
         printshit(var,vf,j,mode)
 #      if vf/pvf>0.9995:
 #        mode=3 
-
+"""
     elif mode==3:
       if gdbg and dbgtime:
         print "mode 3 %d"%(clock()-tstart)
       vf,pvf=optmxbinall(F,(dl[1],dl[2],dl[3],dl[4],dl[5]),var,('y','z','a','b','g'),vf,stepup=2.0),vf
       if dbg and gdbg:
         printshit(var,vf,j,mode)
-
+"""
 def qstr(q):
   if q==qcos:    return 0 
   elif q==qsin:  return 1 
@@ -601,11 +318,5 @@ if __name__=="__main__":
       
   #for i in xrange(1000):
   #  parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  print parsedag(dl[0],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  print parsedag(dl[1],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  print parsedag(dl[2],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  print parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  print parsedag(dl[4],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
-  print parsedag(dl[5],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
 
-# minimize(F,dl,deltaList)
+  minimize(F,dl,deltaList)
