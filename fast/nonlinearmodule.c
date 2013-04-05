@@ -4,21 +4,25 @@
 static char nonlinear_doc[] = 
 "This module is just a simple example.  It provides one function: delta().";
 
-double f1(double a,double b,double g,double x,double y,double z);
-double fd0(double a,double b,double g,double x,double y,double z);
-double fd1(double a,double b,double g,double x,double y,double z);
-double fd2(double a,double b,double g,double x,double y,double z);
-double fd3(double a,double b,double g,double x,double y,double z);
-double fd4(double a,double b,double g,double x,double y,double z);
-double fd5(double a,double b,double g,double x,double y,double z);
+double f1 (double a,double b,double g,double x,double y,double z,double *px,double *py);
+double fd0(double a,double b,double g,double x,double y,double z,double *px,double *py);
+double fd1(double a,double b,double g,double x,double y,double z,double *px,double *py);
+double fd2(double a,double b,double g,double x,double y,double z,double *px,double *py);
+double fd3(double a,double b,double g,double x,double y,double z,double *px,double *py);
+double fd4(double a,double b,double g,double x,double y,double z,double *px,double *py);
+double fd5(double a,double b,double g,double x,double y,double z,double *px,double *py);
+
 
 static PyObject*
 nonlinear_delta(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
-  double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
+  double fa, fb, fg, fx, fy, fz, fr;
+  double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -27,17 +31,25 @@ nonlinear_delta(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=f1(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+  fr=f1(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
 static PyObject*
 nonlinear_d0(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
   double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+	double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -46,17 +58,27 @@ nonlinear_d0(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=fd0(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+
+  fr=fd0(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
 static PyObject*
 nonlinear_d1(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
   double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+	double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -65,7 +87,14 @@ nonlinear_d1(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=fd1(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+
+  fr=fd1(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
@@ -73,10 +102,13 @@ nonlinear_d1(PyObject *self, PyObject *args)
 static PyObject*
 nonlinear_d2(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
   double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+		double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -85,17 +117,27 @@ nonlinear_d2(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=fd2(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+
+  fr=fd2(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
 static PyObject*
 nonlinear_d3(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
   double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+		double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -104,17 +146,27 @@ nonlinear_d3(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=fd3(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+
+  fr=fd3(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
 static PyObject*
 nonlinear_d4(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
   double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+		double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -123,17 +175,27 @@ nonlinear_d4(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=fd4(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+
+  fr=fd4(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
 static PyObject*
 nonlinear_d5(PyObject *self, PyObject *args)
 {
-	PyObject *a, *b, *g, *x, *y, *z;
+	PyObject *a, *b, *g, *x, *y, *z, *p, *pi;
   double fa,fb,fg,fx,fy,fz,fr;
-	
-  if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+		double *fpx=(double*)malloc(12*sizeof(double));	
+  double *fpy=(double*)malloc(12*sizeof(double));	
+  int i;
+
+  if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
 		return NULL;
 	}
   fa=PyFloat_AsDouble(a);
@@ -142,7 +204,13 @@ nonlinear_d5(PyObject *self, PyObject *args)
   fx=PyFloat_AsDouble(x);
   fy=PyFloat_AsDouble(y);
   fz=PyFloat_AsDouble(z);
-  fr=fd5(fa,fb,fg,fx,fy,fz);
+  for(i=0;i<12;i++)
+  { 
+    pi=PyList_GetItem(p,i);
+    fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+    fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+  }
+  fr=fd5(fa,fb,fg,fx,fy,fz,fpx,fpy);
   return PyFloat_FromDouble(fr);
 }
 
@@ -168,10 +236,10 @@ initnonlinear(void)
 	Py_InitModule3("nonlinear", nonlinear_methods, nonlinear_doc);
 }
 
-double f1(double a,double b,double g,double x,double y,double z)
+double f1(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[266]; 
-  v[0]=-475.0;
-  v[1]=-464.0;
+  v[0]=py[0];
+  v[1]=px[6];
   v[2]=a;
   v[3]=sin(v[2]);
   v[4]=g;
@@ -187,7 +255,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[14]=v[7]*v[13];
   v[15]=v[6]+v[14];
   v[16]=v[1]*v[15];
-  v[17]=-260.0;
+  v[17]=py[6];
   v[18]=v[3]*v[12];
   v[19]=v[8]-v[5];
   v[20]=v[11]*v[19];
@@ -226,7 +294,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[53]=v[25]*v[10];
   v[54]=v[52]+v[53];
   v[55]=v[25]*v[54];
-  v[56]=-250.0;
+  v[56]=px[0];
   v[57]=v[56]*v[29];
   v[58]=v[55]-v[57];
   v[59]=y;
@@ -246,10 +314,10 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[73]=pow(v[64],v[68]);
   v[74]=v[72]+v[73];
   v[75]=v[69]/v[74];
-  v[76]=-760.0;
-  v[77]=-271.0;
+  v[76]=py[1];
+  v[77]=px[7];
   v[78]=v[77]*v[15];
-  v[79]=-525.0;
+  v[79]=py[7];
   v[80]=v[79]*v[22];
   v[81]=v[78]+v[80];
   v[82]=v[81]+v[28];
@@ -266,7 +334,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[93]=v[91]+v[92];
   v[94]=v[93]+v[53];
   v[95]=v[25]*v[94];
-  v[96]=27.0;
+  v[96]=px[1];
   v[97]=v[96]*v[82];
   v[98]=v[95]-v[97];
   v[99]=v[98]*v[59];
@@ -284,10 +352,10 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[111]=v[109]+v[110];
   v[112]=v[106]/v[111];
   v[113]=v[75]+v[112];
-  v[114]=-432.0;
-  v[115]=-65.0;
+  v[114]=py[2];
+  v[115]=px[8];
   v[116]=v[115]*v[15];
-  v[117]=-300.0;
+  v[117]=py[8];
   v[118]=v[117]*v[22];
   v[119]=v[116]+v[118];
   v[120]=v[119]+v[28];
@@ -304,7 +372,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[131]=v[129]+v[130];
   v[132]=v[131]+v[53];
   v[133]=v[25]*v[132];
-  v[134]=297.0;
+  v[134]=px[2];
   v[135]=v[134]*v[120];
   v[136]=v[133]-v[135];
   v[137]=v[136]*v[59];
@@ -322,10 +390,10 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[149]=v[147]+v[148];
   v[150]=v[144]/v[149];
   v[151]=v[113]+v[150];
-  v[152]=585.0;
-  v[153]=191.0;
+  v[152]=py[3];
+  v[153]=px[9];
   v[154]=v[153]*v[15];
-  v[155]=645.0;
+  v[155]=py[9];
   v[156]=v[155]*v[22];
   v[157]=v[154]+v[156];
   v[158]=v[157]+v[28];
@@ -342,7 +410,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[169]=v[167]+v[168];
   v[170]=v[169]+v[53];
   v[171]=v[25]*v[170];
-  v[172]=606.0;
+  v[172]=px[3];
   v[173]=v[172]*v[158];
   v[174]=v[171]-v[173];
   v[175]=v[174]*v[59];
@@ -360,10 +428,10 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[187]=v[185]+v[186];
   v[188]=v[182]/v[187];
   v[189]=v[151]+v[188];
-  v[190]=586.0;
-  v[191]=-89.0;
+  v[190]=py[4];
+  v[191]=px[10];
   v[192]=v[191]*v[15];
-  v[193]=593.0;
+  v[193]=py[10];
   v[194]=v[193]*v[22];
   v[195]=v[192]+v[194];
   v[196]=v[195]+v[28];
@@ -380,7 +448,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[207]=v[205]+v[206];
   v[208]=v[207]+v[53];
   v[209]=v[25]*v[208];
-  v[210]=316.0;
+  v[210]=px[4];
   v[211]=v[210]*v[196];
   v[212]=v[209]-v[211];
   v[213]=v[212]*v[59];
@@ -398,10 +466,10 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[225]=v[223]+v[224];
   v[226]=v[220]/v[225];
   v[227]=v[189]+v[226];
-  v[228]=160.0;
-  v[229]=-462.0;
+  v[228]=py[5];
+  v[229]=px[11];
   v[230]=v[229]*v[15];
-  v[231]=208.0;
+  v[231]=py[11];
   v[232]=v[231]*v[22];
   v[233]=v[230]+v[232];
   v[234]=v[233]+v[28];
@@ -418,7 +486,7 @@ double f1(double a,double b,double g,double x,double y,double z)
   v[245]=v[243]+v[244];
   v[246]=v[245]+v[53];
   v[247]=v[25]*v[246];
-  v[248]=-214.0;
+  v[248]=px[5];
   v[249]=v[248]*v[234];
   v[250]=v[247]-v[249];
   v[251]=v[250]*v[59];
@@ -439,11 +507,11 @@ double f1(double a,double b,double g,double x,double y,double z)
   return v[265];
 }
 
-double fd0(double a,double b,double g,double x,double y,double z)
+double fd0(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[284]; 
   v[0]=2;
-  v[1]=-475.0;
-  v[2]=-464.0;
+  v[1]=py[0];
+  v[2]=px[6];
   v[3]=a;
   v[4]=sin(v[3]);
   v[5]=g;
@@ -459,7 +527,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[15]=v[8]*v[14];
   v[16]=v[7]+v[15];
   v[17]=v[2]*v[16];
-  v[18]=-260.0;
+  v[18]=py[6];
   v[19]=v[4]*v[13];
   v[20]=v[9]-v[6];
   v[21]=v[12]*v[20];
@@ -498,7 +566,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[54]=v[26]*v[11];
   v[55]=v[53]+v[54];
   v[56]=v[26]*v[55];
-  v[57]=-250.0;
+  v[57]=px[0];
   v[58]=v[57]*v[30];
   v[59]=v[56]-v[58];
   v[60]=y;
@@ -520,10 +588,10 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[76]=v[70]*v[75];
   v[77]=pow(v[75],v[0]);
   v[78]=v[76]/v[77];
-  v[79]=-760.0;
-  v[80]=-271.0;
+  v[79]=py[1];
+  v[80]=px[7];
   v[81]=v[80]*v[16];
-  v[82]=-525.0;
+  v[82]=py[7];
   v[83]=v[82]*v[23];
   v[84]=v[81]+v[83];
   v[85]=v[84]+v[29];
@@ -540,7 +608,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[96]=v[94]+v[95];
   v[97]=v[96]+v[54];
   v[98]=v[26]*v[97];
-  v[99]=27.0;
+  v[99]=px[1];
   v[100]=v[99]*v[85];
   v[101]=v[98]-v[100];
   v[102]=v[101]*v[60];
@@ -561,10 +629,10 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[117]=pow(v[115],v[0]);
   v[118]=v[116]/v[117];
   v[119]=v[78]+v[118];
-  v[120]=-432.0;
-  v[121]=-65.0;
+  v[120]=py[2];
+  v[121]=px[8];
   v[122]=v[121]*v[16];
-  v[123]=-300.0;
+  v[123]=py[8];
   v[124]=v[123]*v[23];
   v[125]=v[122]+v[124];
   v[126]=v[125]+v[29];
@@ -581,7 +649,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[137]=v[135]+v[136];
   v[138]=v[137]+v[54];
   v[139]=v[26]*v[138];
-  v[140]=297.0;
+  v[140]=px[2];
   v[141]=v[140]*v[126];
   v[142]=v[139]-v[141];
   v[143]=v[142]*v[60];
@@ -602,10 +670,10 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[158]=pow(v[156],v[0]);
   v[159]=v[157]/v[158];
   v[160]=v[119]+v[159];
-  v[161]=585.0;
-  v[162]=191.0;
+  v[161]=py[3];
+  v[162]=px[9];
   v[163]=v[162]*v[16];
-  v[164]=645.0;
+  v[164]=py[9];
   v[165]=v[164]*v[23];
   v[166]=v[163]+v[165];
   v[167]=v[166]+v[29];
@@ -622,7 +690,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[178]=v[176]+v[177];
   v[179]=v[178]+v[54];
   v[180]=v[26]*v[179];
-  v[181]=606.0;
+  v[181]=px[3];
   v[182]=v[181]*v[167];
   v[183]=v[180]-v[182];
   v[184]=v[183]*v[60];
@@ -643,10 +711,10 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[199]=pow(v[197],v[0]);
   v[200]=v[198]/v[199];
   v[201]=v[160]+v[200];
-  v[202]=586.0;
-  v[203]=-89.0;
+  v[202]=py[4];
+  v[203]=px[10];
   v[204]=v[203]*v[16];
-  v[205]=593.0;
+  v[205]=py[10];
   v[206]=v[205]*v[23];
   v[207]=v[204]+v[206];
   v[208]=v[207]+v[29];
@@ -663,7 +731,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[219]=v[217]+v[218];
   v[220]=v[219]+v[54];
   v[221]=v[26]*v[220];
-  v[222]=316.0;
+  v[222]=px[4];
   v[223]=v[222]*v[208];
   v[224]=v[221]-v[223];
   v[225]=v[224]*v[60];
@@ -684,10 +752,10 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[240]=pow(v[238],v[0]);
   v[241]=v[239]/v[240];
   v[242]=v[201]+v[241];
-  v[243]=160.0;
-  v[244]=-462.0;
+  v[243]=py[5];
+  v[244]=px[11];
   v[245]=v[244]*v[16];
-  v[246]=208.0;
+  v[246]=py[11];
   v[247]=v[246]*v[23];
   v[248]=v[245]+v[247];
   v[249]=v[248]+v[29];
@@ -704,7 +772,7 @@ double fd0(double a,double b,double g,double x,double y,double z)
   v[260]=v[258]+v[259];
   v[261]=v[260]+v[54];
   v[262]=v[26]*v[261];
-  v[263]=-214.0;
+  v[263]=px[5];
   v[264]=v[263]*v[249];
   v[265]=v[262]-v[264];
   v[266]=v[265]*v[60];
@@ -728,12 +796,12 @@ double fd0(double a,double b,double g,double x,double y,double z)
   return v[283];
 }
 
-double fd1(double a,double b,double g,double x,double y,double z)
+double fd1(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[284]; 
 
 v[0]=2;
-v[1]=-475.0;
-v[2]=-464.0;
+v[1]=py[0];
+v[2]=px[6];
 v[3]=a;
 v[4]=sin(v[3]);
 v[5]=g;
@@ -749,7 +817,7 @@ v[14]=v[12]*v[13];
 v[15]=v[8]*v[14];
 v[16]=v[7]+v[15];
 v[17]=v[2]*v[16];
-v[18]=-260.0;
+v[18]=py[6];
 v[19]=v[4]*v[13];
 v[20]=v[9]-v[6];
 v[21]=v[12]*v[20];
@@ -788,7 +856,7 @@ v[53]=v[50]+v[52];
 v[54]=v[26]*v[11];
 v[55]=v[53]+v[54];
 v[56]=v[26]*v[55];
-v[57]=-250.0;
+v[57]=px[0];
 v[58]=v[57]*v[30];
 v[59]=v[56]-v[58];
 v[60]=y;
@@ -810,10 +878,10 @@ v[75]=v[73]+v[74];
 v[76]=v[70]*v[75];
 v[77]=pow(v[75],v[0]);
 v[78]=v[76]/v[77];
-v[79]=-760.0;
-v[80]=-271.0;
+v[79]=py[1];
+v[80]=px[7];
 v[81]=v[80]*v[16];
-v[82]=-525.0;
+v[82]=py[7];
 v[83]=v[82]*v[23];
 v[84]=v[81]+v[83];
 v[85]=v[84]+v[29];
@@ -830,7 +898,7 @@ v[95]=v[82]*v[51];
 v[96]=v[94]+v[95];
 v[97]=v[96]+v[54];
 v[98]=v[26]*v[97];
-v[99]=27.0;
+v[99]=px[1];
 v[100]=v[99]*v[85];
 v[101]=v[98]-v[100];
 v[102]=v[101]*v[60];
@@ -851,10 +919,10 @@ v[116]=v[110]*v[115];
 v[117]=pow(v[115],v[0]);
 v[118]=v[116]/v[117];
 v[119]=v[78]+v[118];
-v[120]=-432.0;
-v[121]=-65.0;
+v[120]=py[2];
+v[121]=px[8];
 v[122]=v[121]*v[16];
-v[123]=-300.0;
+v[123]=py[8];
 v[124]=v[123]*v[23];
 v[125]=v[122]+v[124];
 v[126]=v[125]+v[29];
@@ -871,7 +939,7 @@ v[136]=v[123]*v[51];
 v[137]=v[135]+v[136];
 v[138]=v[137]+v[54];
 v[139]=v[26]*v[138];
-v[140]=297.0;
+v[140]=px[2];
 v[141]=v[140]*v[126];
 v[142]=v[139]-v[141];
 v[143]=v[142]*v[60];
@@ -892,10 +960,10 @@ v[157]=v[151]*v[156];
 v[158]=pow(v[156],v[0]);
 v[159]=v[157]/v[158];
 v[160]=v[119]+v[159];
-v[161]=585.0;
-v[162]=191.0;
+v[161]=py[3];
+v[162]=px[9];
 v[163]=v[162]*v[16];
-v[164]=645.0;
+v[164]=py[9];
 v[165]=v[164]*v[23];
 v[166]=v[163]+v[165];
 v[167]=v[166]+v[29];
@@ -912,7 +980,7 @@ v[177]=v[164]*v[51];
 v[178]=v[176]+v[177];
 v[179]=v[178]+v[54];
 v[180]=v[26]*v[179];
-v[181]=606.0;
+v[181]=px[3];
 v[182]=v[181]*v[167];
 v[183]=v[180]-v[182];
 v[184]=v[183]*v[60];
@@ -933,10 +1001,10 @@ v[198]=v[192]*v[197];
 v[199]=pow(v[197],v[0]);
 v[200]=v[198]/v[199];
 v[201]=v[160]+v[200];
-v[202]=586.0;
-v[203]=-89.0;
+v[202]=py[4];
+v[203]=px[10];
 v[204]=v[203]*v[16];
-v[205]=593.0;
+v[205]=py[10];
 v[206]=v[205]*v[23];
 v[207]=v[204]+v[206];
 v[208]=v[207]+v[29];
@@ -953,7 +1021,7 @@ v[218]=v[205]*v[51];
 v[219]=v[217]+v[218];
 v[220]=v[219]+v[54];
 v[221]=v[26]*v[220];
-v[222]=316.0;
+v[222]=px[4];
 v[223]=v[222]*v[208];
 v[224]=v[221]-v[223];
 v[225]=v[224]*v[60];
@@ -974,10 +1042,10 @@ v[239]=v[233]*v[238];
 v[240]=pow(v[238],v[0]);
 v[241]=v[239]/v[240];
 v[242]=v[201]+v[241];
-v[243]=160.0;
-v[244]=-462.0;
+v[243]=py[5];
+v[244]=px[11];
 v[245]=v[244]*v[16];
-v[246]=208.0;
+v[246]=py[11];
 v[247]=v[246]*v[23];
 v[248]=v[245]+v[247];
 v[249]=v[248]+v[29];
@@ -994,7 +1062,7 @@ v[259]=v[246]*v[51];
 v[260]=v[258]+v[259];
 v[261]=v[260]+v[54];
 v[262]=v[26]*v[261];
-v[263]=-214.0;
+v[263]=px[5];
 v[264]=v[263]*v[249];
 v[265]=v[262]-v[264];
 v[266]=v[265]*v[60];
@@ -1018,12 +1086,12 @@ v[283]=v[242]+v[282];
 return v[283];
 }
 
-double fd2(double a,double b,double g,double x,double y,double z)
+double fd2(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[284]; 
 
 v[0]=2;
-v[1]=-475.0;
-v[2]=-464.0;
+v[1]=py[0];
+v[2]=px[6];
 v[3]=a;
 v[4]=sin(v[3]);
 v[5]=g;
@@ -1039,7 +1107,7 @@ v[14]=v[12]*v[13];
 v[15]=v[8]*v[14];
 v[16]=v[7]+v[15];
 v[17]=v[2]*v[16];
-v[18]=-260.0;
+v[18]=py[6];
 v[19]=v[4]*v[13];
 v[20]=v[9]-v[6];
 v[21]=v[12]*v[20];
@@ -1078,7 +1146,7 @@ v[53]=v[50]+v[52];
 v[54]=v[26]*v[11];
 v[55]=v[53]+v[54];
 v[56]=v[26]*v[55];
-v[57]=-250.0;
+v[57]=px[0];
 v[58]=v[57]*v[30];
 v[59]=v[56]-v[58];
 v[60]=y;
@@ -1100,10 +1168,10 @@ v[75]=v[73]+v[74];
 v[76]=v[70]*v[75];
 v[77]=pow(v[75],v[0]);
 v[78]=v[76]/v[77];
-v[79]=-760.0;
-v[80]=-271.0;
+v[79]=py[1];
+v[80]=px[7];
 v[81]=v[80]*v[16];
-v[82]=-525.0;
+v[82]=py[7];
 v[83]=v[82]*v[23];
 v[84]=v[81]+v[83];
 v[85]=v[84]+v[29];
@@ -1120,7 +1188,7 @@ v[95]=v[82]*v[51];
 v[96]=v[94]+v[95];
 v[97]=v[96]+v[54];
 v[98]=v[26]*v[97];
-v[99]=27.0;
+v[99]=px[1];
 v[100]=v[99]*v[85];
 v[101]=v[98]-v[100];
 v[102]=v[101]*v[60];
@@ -1141,10 +1209,10 @@ v[116]=v[110]*v[115];
 v[117]=pow(v[115],v[0]);
 v[118]=v[116]/v[117];
 v[119]=v[78]+v[118];
-v[120]=-432.0;
-v[121]=-65.0;
+v[120]=py[2];
+v[121]=px[8];
 v[122]=v[121]*v[16];
-v[123]=-300.0;
+v[123]=py[8];
 v[124]=v[123]*v[23];
 v[125]=v[122]+v[124];
 v[126]=v[125]+v[29];
@@ -1161,7 +1229,7 @@ v[136]=v[123]*v[51];
 v[137]=v[135]+v[136];
 v[138]=v[137]+v[54];
 v[139]=v[26]*v[138];
-v[140]=297.0;
+v[140]=px[2];
 v[141]=v[140]*v[126];
 v[142]=v[139]-v[141];
 v[143]=v[142]*v[60];
@@ -1182,10 +1250,10 @@ v[157]=v[151]*v[156];
 v[158]=pow(v[156],v[0]);
 v[159]=v[157]/v[158];
 v[160]=v[119]+v[159];
-v[161]=585.0;
-v[162]=191.0;
+v[161]=py[3];
+v[162]=px[9];
 v[163]=v[162]*v[16];
-v[164]=645.0;
+v[164]=py[9];
 v[165]=v[164]*v[23];
 v[166]=v[163]+v[165];
 v[167]=v[166]+v[29];
@@ -1202,7 +1270,7 @@ v[177]=v[164]*v[51];
 v[178]=v[176]+v[177];
 v[179]=v[178]+v[54];
 v[180]=v[26]*v[179];
-v[181]=606.0;
+v[181]=px[3];
 v[182]=v[181]*v[167];
 v[183]=v[180]-v[182];
 v[184]=v[183]*v[60];
@@ -1223,10 +1291,10 @@ v[198]=v[192]*v[197];
 v[199]=pow(v[197],v[0]);
 v[200]=v[198]/v[199];
 v[201]=v[160]+v[200];
-v[202]=586.0;
-v[203]=-89.0;
+v[202]=py[4];
+v[203]=px[10];
 v[204]=v[203]*v[16];
-v[205]=593.0;
+v[205]=py[10];
 v[206]=v[205]*v[23];
 v[207]=v[204]+v[206];
 v[208]=v[207]+v[29];
@@ -1243,7 +1311,7 @@ v[218]=v[205]*v[51];
 v[219]=v[217]+v[218];
 v[220]=v[219]+v[54];
 v[221]=v[26]*v[220];
-v[222]=316.0;
+v[222]=px[4];
 v[223]=v[222]*v[208];
 v[224]=v[221]-v[223];
 v[225]=v[224]*v[60];
@@ -1264,10 +1332,10 @@ v[239]=v[233]*v[238];
 v[240]=pow(v[238],v[0]);
 v[241]=v[239]/v[240];
 v[242]=v[201]+v[241];
-v[243]=160.0;
-v[244]=-462.0;
+v[243]=py[5];
+v[244]=px[11];
 v[245]=v[244]*v[16];
-v[246]=208.0;
+v[246]=py[11];
 v[247]=v[246]*v[23];
 v[248]=v[245]+v[247];
 v[249]=v[248]+v[29];
@@ -1284,7 +1352,7 @@ v[259]=v[246]*v[51];
 v[260]=v[258]+v[259];
 v[261]=v[260]+v[54];
 v[262]=v[26]*v[261];
-v[263]=-214.0;
+v[263]=px[5];
 v[264]=v[263]*v[249];
 v[265]=v[262]-v[264];
 v[266]=v[265]*v[60];
@@ -1308,11 +1376,11 @@ v[283]=v[242]+v[282];
 return v[283];
 } 
 
-double fd3(double a,double b,double g,double x,double y,double z)
+double fd3(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[443]; 
   v[0]=2;
-  v[1]=-475.0;
-  v[2]=-464.0;
+  v[1]=py[0];
+  v[2]=px[6];
   v[3]=a;
   v[4]=sin(v[3]);
   v[5]=g;
@@ -1328,7 +1396,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[15]=v[8]*v[14];
   v[16]=v[7]+v[15];
   v[17]=v[2]*v[16];
-  v[18]=-260.0;
+  v[18]=py[6];
   v[19]=v[4]*v[13];
   v[20]=v[9]-v[6];
   v[21]=v[12]*v[20];
@@ -1367,7 +1435,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[54]=v[26]*v[11];
   v[55]=v[53]+v[54];
   v[56]=v[26]*v[55];
-  v[57]=-250.0;
+  v[57]=px[0];
   v[58]=v[57]*v[30];
   v[59]=v[56]-v[58];
   v[60]=y;
@@ -1423,10 +1491,10 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[110]=v[99]-v[109];
   v[111]=pow(v[98],v[0]);
   v[112]=v[110]/v[111];
-  v[113]=-760.0;
-  v[114]=-271.0;
+  v[113]=py[1];
+  v[114]=px[7];
   v[115]=v[114]*v[16];
-  v[116]=-525.0;
+  v[116]=py[7];
   v[117]=v[116]*v[23];
   v[118]=v[115]+v[117];
   v[119]=v[118]+v[29];
@@ -1443,7 +1511,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[130]=v[128]+v[129];
   v[131]=v[130]+v[54];
   v[132]=v[26]*v[131];
-  v[133]=27.0;
+  v[133]=px[1];
   v[134]=v[133]*v[119];
   v[135]=v[132]-v[134];
   v[136]=v[135]*v[60];
@@ -1489,10 +1557,10 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[176]=pow(v[163],v[0]);
   v[177]=v[175]/v[176];
   v[178]=v[112]+v[177];
-  v[179]=-432.0;
-  v[180]=-65.0;
+  v[179]=py[2];
+  v[180]=px[8];
   v[181]=v[180]*v[16];
-  v[182]=-300.0;
+  v[182]=py[8];
   v[183]=v[182]*v[23];
   v[184]=v[181]+v[183];
   v[185]=v[184]+v[29];
@@ -1509,7 +1577,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[196]=v[194]+v[195];
   v[197]=v[196]+v[54];
   v[198]=v[26]*v[197];
-  v[199]=297.0;
+  v[199]=px[2];
   v[200]=v[199]*v[185];
   v[201]=v[198]-v[200];
   v[202]=v[201]*v[60];
@@ -1555,10 +1623,10 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[242]=pow(v[229],v[0]);
   v[243]=v[241]/v[242];
   v[244]=v[178]+v[243];
-  v[245]=585.0;
-  v[246]=191.0;
+  v[245]=py[3];
+  v[246]=px[9];
   v[247]=v[246]*v[16];
-  v[248]=645.0;
+  v[248]=py[9];
   v[249]=v[248]*v[23];
   v[250]=v[247]+v[249];
   v[251]=v[250]+v[29];
@@ -1575,7 +1643,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[262]=v[260]+v[261];
   v[263]=v[262]+v[54];
   v[264]=v[26]*v[263];
-  v[265]=606.0;
+  v[265]=px[3];
   v[266]=v[265]*v[251];
   v[267]=v[264]-v[266];
   v[268]=v[267]*v[60];
@@ -1621,10 +1689,10 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[308]=pow(v[295],v[0]);
   v[309]=v[307]/v[308];
   v[310]=v[244]+v[309];
-  v[311]=586.0;
-  v[312]=-89.0;
+  v[311]=py[4];
+  v[312]=px[10];
   v[313]=v[312]*v[16];
-  v[314]=593.0;
+  v[314]=py[10];
   v[315]=v[314]*v[23];
   v[316]=v[313]+v[315];
   v[317]=v[316]+v[29];
@@ -1641,7 +1709,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[328]=v[326]+v[327];
   v[329]=v[328]+v[54];
   v[330]=v[26]*v[329];
-  v[331]=316.0;
+  v[331]=px[4];
   v[332]=v[331]*v[317];
   v[333]=v[330]-v[332];
   v[334]=v[333]*v[60];
@@ -1687,10 +1755,10 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[374]=pow(v[361],v[0]);
   v[375]=v[373]/v[374];
   v[376]=v[310]+v[375];
-  v[377]=160.0;
-  v[378]=-462.0;
+  v[377]=py[5];
+  v[378]=px[11];
   v[379]=v[378]*v[16];
-  v[380]=208.0;
+  v[380]=py[11];
   v[381]=v[380]*v[23];
   v[382]=v[379]+v[381];
   v[383]=v[382]+v[29];
@@ -1707,7 +1775,7 @@ double fd3(double a,double b,double g,double x,double y,double z)
   v[394]=v[392]+v[393];
   v[395]=v[394]+v[54];
   v[396]=v[26]*v[395];
-  v[397]=-214.0;
+  v[397]=px[5];
   v[398]=v[397]*v[383];
   v[399]=v[396]-v[398];
   v[400]=v[399]*v[60];
@@ -1756,12 +1824,12 @@ double fd3(double a,double b,double g,double x,double y,double z)
   return v[442];
 }
 
-double fd4(double a,double b,double g,double x,double y,double z)
+double fd4(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[518]; 
 
   v[0]=2;
-  v[1]=-475.0;
-  v[2]=-464.0;
+  v[1]=py[0];
+  v[2]=px[6];
   v[3]=a;
   v[4]=sin(v[3]);
   v[5]=g;
@@ -1777,7 +1845,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[15]=v[8]*v[14];
   v[16]=v[7]+v[15];
   v[17]=v[2]*v[16];
-  v[18]=-260.0;
+  v[18]=py[6];
   v[19]=v[4]*v[13];
   v[20]=v[9]-v[6];
   v[21]=v[12]*v[20];
@@ -1816,7 +1884,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[54]=v[26]*v[11];
   v[55]=v[53]+v[54];
   v[56]=v[26]*v[55];
-  v[57]=-250.0;
+  v[57]=px[0];
   v[58]=v[57]*v[30];
   v[59]=v[56]-v[58];
   v[60]=y;
@@ -1887,10 +1955,10 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[125]=v[114]-v[124];
   v[126]=pow(v[113],v[0]);
   v[127]=v[125]/v[126];
-  v[128]=-760.0;
-  v[129]=-271.0;
+  v[128]=py[1];
+  v[129]=px[7];
   v[130]=v[129]*v[16];
-  v[131]=-525.0;
+  v[131]=py[7];
   v[132]=v[131]*v[23];
   v[133]=v[130]+v[132];
   v[134]=v[133]+v[29];
@@ -1907,7 +1975,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[145]=v[143]+v[144];
   v[146]=v[145]+v[54];
   v[147]=v[26]*v[146];
-  v[148]=27.0;
+  v[148]=px[1];
   v[149]=v[148]*v[134];
   v[150]=v[147]-v[149];
   v[151]=v[150]*v[60];
@@ -1965,10 +2033,10 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[203]=pow(v[190],v[0]);
   v[204]=v[202]/v[203];
   v[205]=v[127]+v[204];
-  v[206]=-432.0;
-  v[207]=-65.0;
+  v[206]=py[2];
+  v[207]=px[8];
   v[208]=v[207]*v[16];
-  v[209]=-300.0;
+  v[209]=py[8];
   v[210]=v[209]*v[23];
   v[211]=v[208]+v[210];
   v[212]=v[211]+v[29];
@@ -1985,7 +2053,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[223]=v[221]+v[222];
   v[224]=v[223]+v[54];
   v[225]=v[26]*v[224];
-  v[226]=297.0;
+  v[226]=px[2];
   v[227]=v[226]*v[212];
   v[228]=v[225]-v[227];
   v[229]=v[228]*v[60];
@@ -2043,10 +2111,10 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[281]=pow(v[268],v[0]);
   v[282]=v[280]/v[281];
   v[283]=v[205]+v[282];
-  v[284]=585.0;
-  v[285]=191.0;
+  v[284]=py[3];
+  v[285]=px[9];
   v[286]=v[285]*v[16];
-  v[287]=645.0;
+  v[287]=py[9];
   v[288]=v[287]*v[23];
   v[289]=v[286]+v[288];
   v[290]=v[289]+v[29];
@@ -2063,7 +2131,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[301]=v[299]+v[300];
   v[302]=v[301]+v[54];
   v[303]=v[26]*v[302];
-  v[304]=606.0;
+  v[304]=px[3];
   v[305]=v[304]*v[290];
   v[306]=v[303]-v[305];
   v[307]=v[306]*v[60];
@@ -2121,10 +2189,10 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[359]=pow(v[346],v[0]);
   v[360]=v[358]/v[359];
   v[361]=v[283]+v[360];
-  v[362]=586.0;
-  v[363]=-89.0;
+  v[362]=py[4];
+  v[363]=px[10];
   v[364]=v[363]*v[16];
-  v[365]=593.0;
+  v[365]=py[10];
   v[366]=v[365]*v[23];
   v[367]=v[364]+v[366];
   v[368]=v[367]+v[29];
@@ -2141,7 +2209,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[379]=v[377]+v[378];
   v[380]=v[379]+v[54];
   v[381]=v[26]*v[380];
-  v[382]=316.0;
+  v[382]=px[4];
   v[383]=v[382]*v[368];
   v[384]=v[381]-v[383];
   v[385]=v[384]*v[60];
@@ -2199,10 +2267,10 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[437]=pow(v[424],v[0]);
   v[438]=v[436]/v[437];
   v[439]=v[361]+v[438];
-  v[440]=160.0;
-  v[441]=-462.0;
+  v[440]=py[5];
+  v[441]=px[11];
   v[442]=v[441]*v[16];
-  v[443]=208.0;
+  v[443]=py[11];
   v[444]=v[443]*v[23];
   v[445]=v[442]+v[444];
   v[446]=v[445]+v[29];
@@ -2219,7 +2287,7 @@ double fd4(double a,double b,double g,double x,double y,double z)
   v[457]=v[455]+v[456];
   v[458]=v[457]+v[54];
   v[459]=v[26]*v[458];
-  v[460]=-214.0;
+  v[460]=px[5];
   v[461]=v[460]*v[446];
   v[462]=v[459]-v[461];
   v[463]=v[462]*v[60];
@@ -2280,11 +2348,11 @@ double fd4(double a,double b,double g,double x,double y,double z)
   return v[517];
 }
 
-double fd5(double a,double b,double g,double x,double y,double z)
+double fd5(double a,double b,double g,double x,double y,double z,double *px,double *py)
 { double v[497]; 
   v[0]=2;
-  v[1]=-475.0;
-  v[2]=-464.0;
+  v[1]=py[0];
+  v[2]=px[6];
   v[3]=a;
   v[4]=sin(v[3]);
   v[5]=g;
@@ -2300,7 +2368,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[15]=v[8]*v[14];
   v[16]=v[7]+v[15];
   v[17]=v[2]*v[16];
-  v[18]=-260.0;
+  v[18]=py[6];
   v[19]=v[4]*v[13];
   v[20]=v[9]-v[6];
   v[21]=v[12]*v[20];
@@ -2339,7 +2407,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[54]=v[26]*v[11];
   v[55]=v[53]+v[54];
   v[56]=v[26]*v[55];
-  v[57]=-250.0;
+  v[57]=px[0];
   v[58]=v[57]*v[30];
   v[59]=v[56]-v[58];
   v[60]=y;
@@ -2404,10 +2472,10 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[119]=v[108]-v[118];
   v[120]=pow(v[107],v[0]);
   v[121]=v[119]/v[120];
-  v[122]=-760.0;
-  v[123]=-271.0;
+  v[122]=py[1];
+  v[123]=px[7];
   v[124]=v[123]*v[16];
-  v[125]=-525.0;
+  v[125]=py[7];
   v[126]=v[125]*v[23];
   v[127]=v[124]+v[126];
   v[128]=v[127]+v[29];
@@ -2424,7 +2492,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[139]=v[137]+v[138];
   v[140]=v[139]+v[54];
   v[141]=v[26]*v[140];
-  v[142]=27.0;
+  v[142]=px[1];
   v[143]=v[142]*v[128];
   v[144]=v[141]-v[143];
   v[145]=v[144]*v[60];
@@ -2479,10 +2547,10 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[194]=pow(v[181],v[0]);
   v[195]=v[193]/v[194];
   v[196]=v[121]+v[195];
-  v[197]=-432.0;
-  v[198]=-65.0;
+  v[197]=py[2];
+  v[198]=px[8];
   v[199]=v[198]*v[16];
-  v[200]=-300.0;
+  v[200]=py[8];
   v[201]=v[200]*v[23];
   v[202]=v[199]+v[201];
   v[203]=v[202]+v[29];
@@ -2499,7 +2567,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[214]=v[212]+v[213];
   v[215]=v[214]+v[54];
   v[216]=v[26]*v[215];
-  v[217]=297.0;
+  v[217]=px[2];
   v[218]=v[217]*v[203];
   v[219]=v[216]-v[218];
   v[220]=v[219]*v[60];
@@ -2554,10 +2622,10 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[269]=pow(v[256],v[0]);
   v[270]=v[268]/v[269];
   v[271]=v[196]+v[270];
-  v[272]=585.0;
-  v[273]=191.0;
+  v[272]=py[3];
+  v[273]=px[9];
   v[274]=v[273]*v[16];
-  v[275]=645.0;
+  v[275]=py[9];
   v[276]=v[275]*v[23];
   v[277]=v[274]+v[276];
   v[278]=v[277]+v[29];
@@ -2574,7 +2642,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[289]=v[287]+v[288];
   v[290]=v[289]+v[54];
   v[291]=v[26]*v[290];
-  v[292]=606.0;
+  v[292]=px[3];
   v[293]=v[292]*v[278];
   v[294]=v[291]-v[293];
   v[295]=v[294]*v[60];
@@ -2629,10 +2697,10 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[344]=pow(v[331],v[0]);
   v[345]=v[343]/v[344];
   v[346]=v[271]+v[345];
-  v[347]=586.0;
-  v[348]=-89.0;
+  v[347]=py[4];
+  v[348]=px[10];
   v[349]=v[348]*v[16];
-  v[350]=593.0;
+  v[350]=py[10];
   v[351]=v[350]*v[23];
   v[352]=v[349]+v[351];
   v[353]=v[352]+v[29];
@@ -2649,7 +2717,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[364]=v[362]+v[363];
   v[365]=v[364]+v[54];
   v[366]=v[26]*v[365];
-  v[367]=316.0;
+  v[367]=px[4];
   v[368]=v[367]*v[353];
   v[369]=v[366]-v[368];
   v[370]=v[369]*v[60];
@@ -2704,10 +2772,10 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[419]=pow(v[406],v[0]);
   v[420]=v[418]/v[419];
   v[421]=v[346]+v[420];
-  v[422]=160.0;
-  v[423]=-462.0;
+  v[422]=py[5];
+  v[423]=px[11];
   v[424]=v[423]*v[16];
-  v[425]=208.0;
+  v[425]=py[11];
   v[426]=v[425]*v[23];
   v[427]=v[424]+v[426];
   v[428]=v[427]+v[29];
@@ -2724,7 +2792,7 @@ double fd5(double a,double b,double g,double x,double y,double z)
   v[439]=v[437]+v[438];
   v[440]=v[439]+v[54];
   v[441]=v[26]*v[440];
-  v[442]=-214.0;
+  v[442]=px[5];
   v[443]=v[442]*v[428];
   v[444]=v[441]-v[443];
   v[445]=v[444]*v[60];

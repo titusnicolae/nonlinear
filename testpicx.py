@@ -427,7 +427,7 @@ def printshit(var,vf,j,mode=None):
 
 def minimize(F,dl,deltaList):
   mode=1
-  var={'x':10000.0,'y':0.0,'z':0.0,'a':0.0,'b':-0.60,'g':0.0} #synthetic1
+  var={'x':10000.0,'y':0.0,'z':0.0,'a':0.0,'b':0.0,'g':0.0} #synthetic1
   #var={'x':10000.0,'y':-3093.0,'z':6493.0,'a':-0.5,'b':-1.02,'g':-0.87} #livingroom-free1
   #var={'x':100.0,'y':15000.0,'z':0.0,'a':-0.4,'b':0.0,'g':0.0} #y-rotx
   #var={'x':10000.0,'y':-2962.9007,'z':4922.80,'a':-0.4106,'b':-0.9155,'g':-0.749} #points3/fence
@@ -505,5 +505,12 @@ if __name__=="__main__":
   (p1,p2,s,f)=readfile("synthetic1.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
-  (F,dl,deltaList)=system(v1,v2) 
-  minimize(F,dl,deltaList)
+  (F,dl,deltaList)=system(v1,v2)
+  var={'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0}
+  print parsedag(F,{},var) 
+  print parsedag(dl[1],{},var) 
+  print parsedag(dl[2],{},var) 
+  print parsedag(dl[3],{},var) 
+  print parsedag(dl[4],{},var) 
+  print parsedag(dl[5],{},var) 
+  #minimize(F,dl,deltaList)

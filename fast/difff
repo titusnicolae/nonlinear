@@ -1,0 +1,726 @@
+7,13c7,14
+< double f1(double a,double b,double g,double x,double y,double z);
+< double fd0(double a,double b,double g,double x,double y,double z);
+< double fd1(double a,double b,double g,double x,double y,double z);
+< double fd2(double a,double b,double g,double x,double y,double z);
+< double fd3(double a,double b,double g,double x,double y,double z);
+< double fd4(double a,double b,double g,double x,double y,double z);
+< double fd5(double a,double b,double g,double x,double y,double z);
+---
+> double f1 (double a,double b,double g,double x,double y,double z,double *px,double *py);
+> double fd0(double a,double b,double g,double x,double y,double z,double *px,double *py);
+> double fd1(double a,double b,double g,double x,double y,double z,double *px,double *py);
+> double fd2(double a,double b,double g,double x,double y,double z,double *px,double *py);
+> double fd3(double a,double b,double g,double x,double y,double z,double *px,double *py);
+> double fd4(double a,double b,double g,double x,double y,double z,double *px,double *py);
+> double fd5(double a,double b,double g,double x,double y,double z,double *px,double *py);
+> 
+18,21c19,25
+< 	PyObject *a, *b, *g, *x, *y, *z;
+<   double fa,fb,fg,fx,fy,fz,fr;
+< 	
+<   if (!PyArg_UnpackTuple(args, "delta", 6, 6, &a, &b, &g, &x, &y, &z)) {
+---
+> 	PyObject *a, *b, *g, *x, *y, *z, *p, *pi, *l, *r;
+>   double fa,fb,fg,fx,fy,fz,fr,left,right;
+>   double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+>   int i;
+> 
+>   if (!PyArg_UnpackTuple(args, "delta", 7, 7, &a, &b, &g, &x, &y, &z, &p)) {
+30c34,45
+<   fr=f1(fa,fb,fg,fx,fy,fz);
+---
+>   if(PyList_Check(p))
+>   { printf("is list\n");
+>   //  return PyFloat_FromDouble(0);
+>   }
+>   for(i=0;i<12;i++)
+>   { 
+>     pi=PyList_GetItem(p,i);
+>     fpx[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,0));
+>     fpy[i]=PyFloat_AsDouble(PyTuple_GetItem(pi,1));
+> //    printf("%d %f %f\n",i,fpx[i],fpy[i]); 
+>   }
+>   fr=f1(fa,fb,fg,fx,fy,fz,fpx,fpy);
+39c54,56
+< 	
+---
+> 	double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+> 
+49c66
+<   fr=fd0(fa,fb,fg,fx,fy,fz);
+---
+>   fr=fd0(fa,fb,fg,fx,fy,fz,fpx,fpy);
+58c75,78
+< 	
+---
+> 	double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+> 
+> 
+68c88
+<   fr=fd1(fa,fb,fg,fx,fy,fz);
+---
+>   fr=fd1(fa,fb,fg,fx,fy,fz,fpx,fpy);
+78c98,101
+< 	
+---
+> 		double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+> 
+> 
+88c111
+<   fr=fd2(fa,fb,fg,fx,fy,fz);
+---
+>   fr=fd2(fa,fb,fg,fx,fy,fz,fpx,fpy);
+97c120,123
+< 	
+---
+> 		double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+> 
+> 
+107c133
+<   fr=fd3(fa,fb,fg,fx,fy,fz);
+---
+>   fr=fd3(fa,fb,fg,fx,fy,fz,fpx,fpy);
+116c142,145
+< 	
+---
+> 		double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+> 
+> 
+126c155
+<   fr=fd4(fa,fb,fg,fx,fy,fz);
+---
+>   fr=fd4(fa,fb,fg,fx,fy,fz,fpx,fpy);
+135c164,167
+< 	
+---
+> 		double *fpx=(double*)malloc(12*sizeof(double));	
+>   double *fpy=(double*)malloc(12*sizeof(double));	
+> 
+> 
+145c177
+<   fr=fd5(fa,fb,fg,fx,fy,fz);
+---
+>   fr=fd5(fa,fb,fg,fx,fy,fz,fpx,fpy);
+171c203
+< double f1(double a,double b,double g,double x,double y,double z)
+---
+> double f1(double a,double b,double g,double x,double y,double z,double *px,double *py)
+173,174c205,206
+<   v[0]=-475.0;
+<   v[1]=-464.0;
+---
+>   v[0]=py[0];
+>   v[1]=px[6];
+190c222
+<   v[17]=-260.0;
+---
+>   v[17]=py[6];
+229c261
+<   v[56]=-250.0;
+---
+>   v[56]=px[0];
+249,250c281,282
+<   v[76]=-760.0;
+<   v[77]=-271.0;
+---
+>   v[76]=py[1];
+>   v[77]=px[7];
+252c284
+<   v[79]=-525.0;
+---
+>   v[79]=py[7];
+269c301
+<   v[96]=27.0;
+---
+>   v[96]=px[1];
+287,288c319,320
+<   v[114]=-432.0;
+<   v[115]=-65.0;
+---
+>   v[114]=py[2];
+>   v[115]=px[8];
+290c322
+<   v[117]=-300.0;
+---
+>   v[117]=py[8];
+307c339
+<   v[134]=297.0;
+---
+>   v[134]=px[2];
+325,326c357,358
+<   v[152]=585.0;
+<   v[153]=191.0;
+---
+>   v[152]=py[3];
+>   v[153]=px[9];
+328c360
+<   v[155]=645.0;
+---
+>   v[155]=py[9];
+345c377
+<   v[172]=606.0;
+---
+>   v[172]=px[3];
+363,364c395,396
+<   v[190]=586.0;
+<   v[191]=-89.0;
+---
+>   v[190]=py[4];
+>   v[191]=px[10];
+366c398
+<   v[193]=593.0;
+---
+>   v[193]=py[10];
+383c415
+<   v[210]=316.0;
+---
+>   v[210]=px[4];
+401,402c433,434
+<   v[228]=160.0;
+<   v[229]=-462.0;
+---
+>   v[228]=py[5];
+>   v[229]=px[11];
+404c436
+<   v[231]=208.0;
+---
+>   v[231]=py[11];
+421c453
+<   v[248]=-214.0;
+---
+>   v[248]=-px[5];
+442c474
+< double fd0(double a,double b,double g,double x,double y,double z)
+---
+> double fd0(double a,double b,double g,double x,double y,double z,double *px,double *py)
+445,446c477,478
+<   v[1]=-475.0;
+<   v[2]=-464.0;
+---
+>   v[1]=py[0];
+>   v[2]=px[6];
+462c494
+<   v[18]=-260.0;
+---
+>   v[18]=py[6];
+501c533
+<   v[57]=-250.0;
+---
+>   v[57]=px[0];
+523,524c555,556
+<   v[79]=-760.0;
+<   v[80]=-271.0;
+---
+>   v[79]=py[1];
+>   v[80]=px[7];
+526c558
+<   v[82]=-525.0;
+---
+>   v[82]=py[7];
+543c575
+<   v[99]=27.0;
+---
+>   v[99]=px[1];
+564,565c596,597
+<   v[120]=-432.0;
+<   v[121]=-65.0;
+---
+>   v[120]=py[2];
+>   v[121]=px[8];
+567c599
+<   v[123]=-300.0;
+---
+>   v[123]=py[8];
+584c616
+<   v[140]=297.0;
+---
+>   v[140]=px[2];
+605,606c637,638
+<   v[161]=585.0;
+<   v[162]=191.0;
+---
+>   v[161]=py[3];
+>   v[162]=px[9];
+608c640
+<   v[164]=645.0;
+---
+>   v[164]=py[9];
+625c657
+<   v[181]=606.0;
+---
+>   v[181]=px[3];
+646,647c678,679
+<   v[202]=586.0;
+<   v[203]=-89.0;
+---
+>   v[202]=py[4];
+>   v[203]=px[10];
+649c681
+<   v[205]=593.0;
+---
+>   v[205]=py[10];
+666c698
+<   v[222]=316.0;
+---
+>   v[222]=px[4];
+687,688c719,720
+<   v[243]=160.0;
+<   v[244]=-462.0;
+---
+>   v[243]=py[5];
+>   v[244]=px[11];
+690c722
+<   v[246]=208.0;
+---
+>   v[246]=py[11];
+707c739
+<   v[263]=-214.0;
+---
+>   v[263]=-px[5];
+731c763
+< double fd1(double a,double b,double g,double x,double y,double z)
+---
+> double fd1(double a,double b,double g,double x,double y,double z,double *px,double *py)
+735,736c767,768
+< v[1]=-475.0;
+< v[2]=-464.0;
+---
+> v[1]=py[0];
+> v[2]=px[6];
+752c784
+< v[18]=-260.0;
+---
+> v[18]=py[6];
+791c823
+< v[57]=-250.0;
+---
+> v[57]=px[0];
+813,814c845,846
+< v[79]=-760.0;
+< v[80]=-271.0;
+---
+> v[79]=py[1];
+> v[80]=px[7];
+816c848
+< v[82]=-525.0;
+---
+> v[82]=py[7];
+833c865
+< v[99]=27.0;
+---
+> v[99]=px[1];
+854,855c886,887
+< v[120]=-432.0;
+< v[121]=-65.0;
+---
+> v[120]=py[2];
+> v[121]=px[8];
+857c889
+< v[123]=-300.0;
+---
+> v[123]=py[8];
+874c906
+< v[140]=297.0;
+---
+> v[140]=px[2];
+895,896c927,928
+< v[161]=585.0;
+< v[162]=191.0;
+---
+> v[161]=py[3];
+> v[162]=px[9];
+898c930
+< v[164]=645.0;
+---
+> v[164]=py[9];
+915c947
+< v[181]=606.0;
+---
+> v[181]=px[3];
+936,937c968,969
+< v[202]=586.0;
+< v[203]=-89.0;
+---
+> v[202]=py[4];
+> v[203]=px[10];
+939c971
+< v[205]=593.0;
+---
+> v[205]=py[10];
+956c988
+< v[222]=316.0;
+---
+> v[222]=px[4];
+977,978c1009,1010
+< v[243]=160.0;
+< v[244]=-462.0;
+---
+> v[243]=py[5];
+> v[244]=px[11];
+980c1012
+< v[246]=208.0;
+---
+> v[246]=py[11];
+997c1029
+< v[263]=-214.0;
+---
+> v[263]=-px[5];
+1021c1053
+< double fd2(double a,double b,double g,double x,double y,double z)
+---
+> double fd2(double a,double b,double g,double x,double y,double z,double *px,double *py)
+1025,1026c1057,1058
+< v[1]=-475.0;
+< v[2]=-464.0;
+---
+> v[1]=py[0];
+> v[2]=px[6];
+1042c1074
+< v[18]=-260.0;
+---
+> v[18]=py[6];
+1081c1113
+< v[57]=-250.0;
+---
+> v[57]=px[0];
+1103,1104c1135,1136
+< v[79]=-760.0;
+< v[80]=-271.0;
+---
+> v[79]=py[1];
+> v[80]=px[7];
+1106c1138
+< v[82]=-525.0;
+---
+> v[82]=py[7];
+1123c1155
+< v[99]=27.0;
+---
+> v[99]=px[1];
+1144,1145c1176,1177
+< v[120]=-432.0;
+< v[121]=-65.0;
+---
+> v[120]=py[2];
+> v[121]=px[8];
+1147c1179
+< v[123]=-300.0;
+---
+> v[123]=py[8];
+1164c1196
+< v[140]=297.0;
+---
+> v[140]=px[2];
+1185,1186c1217,1218
+< v[161]=585.0;
+< v[162]=191.0;
+---
+> v[161]=py[3];
+> v[162]=px[9];
+1188c1220
+< v[164]=645.0;
+---
+> v[164]=py[9];
+1205c1237
+< v[181]=606.0;
+---
+> v[181]=px[3];
+1226,1227c1258,1259
+< v[202]=586.0;
+< v[203]=-89.0;
+---
+> v[202]=py[4];
+> v[203]=px[10];
+1229c1261
+< v[205]=593.0;
+---
+> v[205]=py[10];
+1246c1278
+< v[222]=316.0;
+---
+> v[222]=px[4];
+1267,1268c1299,1300
+< v[243]=160.0;
+< v[244]=-462.0;
+---
+> v[243]=py[5];
+> v[244]=px[11];
+1270c1302
+< v[246]=208.0;
+---
+> v[246]=py[11];
+1287c1319
+< v[263]=-214.0;
+---
+> v[263]=-px[5];
+1311c1343
+< double fd3(double a,double b,double g,double x,double y,double z)
+---
+> double fd3(double a,double b,double g,double x,double y,double z,double *px,double *py)
+1314,1315c1346,1347
+<   v[1]=-475.0;
+<   v[2]=-464.0;
+---
+>   v[1]=py[0];
+>   v[2]=px[6];
+1331c1363
+<   v[18]=-260.0;
+---
+>   v[18]=py[6];
+1370c1402
+<   v[57]=-250.0;
+---
+>   v[57]=px[0];
+1426,1427c1458,1459
+<   v[113]=-760.0;
+<   v[114]=-271.0;
+---
+>   v[113]=py[1];
+>   v[114]=px[7];
+1429c1461
+<   v[116]=-525.0;
+---
+>   v[116]=py[7];
+1446c1478
+<   v[133]=27.0;
+---
+>   v[133]=px[1];
+1492,1493c1524,1525
+<   v[179]=-432.0;
+<   v[180]=-65.0;
+---
+>   v[179]=py[2];
+>   v[180]=px[8];
+1495c1527
+<   v[182]=-300.0;
+---
+>   v[182]=py[8];
+1512c1544
+<   v[199]=297.0;
+---
+>   v[199]=px[2];
+1558,1559c1590,1591
+<   v[245]=585.0;
+<   v[246]=191.0;
+---
+>   v[245]=py[3];
+>   v[246]=px[9];
+1561c1593
+<   v[248]=645.0;
+---
+>   v[248]=py[9];
+1578c1610
+<   v[265]=606.0;
+---
+>   v[265]=px[3];
+1624,1625c1656,1657
+<   v[311]=586.0;
+<   v[312]=-89.0;
+---
+>   v[311]=py[4];
+>   v[312]=px[10];
+1627c1659
+<   v[314]=593.0;
+---
+>   v[314]=py[10];
+1644c1676
+<   v[331]=316.0;
+---
+>   v[331]=px[4];
+1690,1691c1722,1723
+<   v[377]=160.0;
+<   v[378]=-462.0;
+---
+>   v[377]=py[5];
+>   v[378]=px[11];
+1693c1725
+<   v[380]=208.0;
+---
+>   v[380]=py[11];
+1710c1742
+<   v[397]=-214.0;
+---
+>   v[397]=-px[5];
+1759c1791
+< double fd4(double a,double b,double g,double x,double y,double z)
+---
+> double fd4(double a,double b,double g,double x,double y,double z,double *px,double *py)
+1763,1764c1795,1796
+<   v[1]=-475.0;
+<   v[2]=-464.0;
+---
+>   v[1]=py[0];
+>   v[2]=px[6];
+1780c1812
+<   v[18]=-260.0;
+---
+>   v[18]=py[6];
+1819c1851
+<   v[57]=-250.0;
+---
+>   v[57]=px[0];
+1890,1891c1922,1923
+<   v[128]=-760.0;
+<   v[129]=-271.0;
+---
+>   v[128]=py[1];
+>   v[129]=px[7];
+1893c1925
+<   v[131]=-525.0;
+---
+>   v[131]=py[7];
+1910c1942
+<   v[148]=27.0;
+---
+>   v[148]=px[1];
+1968,1969c2000,2001
+<   v[206]=-432.0;
+<   v[207]=-65.0;
+---
+>   v[206]=py[2];
+>   v[207]=px[8];
+1971c2003
+<   v[209]=-300.0;
+---
+>   v[209]=py[8];
+1988c2020
+<   v[226]=297.0;
+---
+>   v[226]=px[2];
+2046,2047c2078,2079
+<   v[284]=585.0;
+<   v[285]=191.0;
+---
+>   v[284]=py[3];
+>   v[285]=px[9];
+2049c2081
+<   v[287]=645.0;
+---
+>   v[287]=py[9];
+2066c2098
+<   v[304]=606.0;
+---
+>   v[304]=px[3];
+2124,2125c2156,2157
+<   v[362]=586.0;
+<   v[363]=-89.0;
+---
+>   v[362]=py[4];
+>   v[363]=px[10];
+2127c2159
+<   v[365]=593.0;
+---
+>   v[365]=py[10];
+2144c2176
+<   v[382]=316.0;
+---
+>   v[382]=px[4];
+2202,2203c2234,2235
+<   v[440]=160.0;
+<   v[441]=-462.0;
+---
+>   v[440]=py[5];
+>   v[441]=px[11];
+2205c2237
+<   v[443]=208.0;
+---
+>   v[443]=py[11];
+2222c2254
+<   v[460]=-214.0;
+---
+>   v[460]=-px[5];
+2283c2315
+< double fd5(double a,double b,double g,double x,double y,double z)
+---
+> double fd5(double a,double b,double g,double x,double y,double z,double *px,double *py)
+2286,2287c2318,2319
+<   v[1]=-475.0;
+<   v[2]=-464.0;
+---
+>   v[1]=py[0];
+>   v[2]=px[6];
+2303c2335
+<   v[18]=-260.0;
+---
+>   v[18]=py[6];
+2342c2374
+<   v[57]=-250.0;
+---
+>   v[57]=px[0];
+2407,2408c2439,2440
+<   v[122]=-760.0;
+<   v[123]=-271.0;
+---
+>   v[122]=py[1];
+>   v[123]=px[7];
+2410c2442
+<   v[125]=-525.0;
+---
+>   v[125]=py[7];
+2427c2459
+<   v[142]=27.0;
+---
+>   v[142]=px[1];
+2482,2483c2514,2515
+<   v[197]=-432.0;
+<   v[198]=-65.0;
+---
+>   v[197]=py[2];
+>   v[198]=px[8];
+2485c2517
+<   v[200]=-300.0;
+---
+>   v[200]=py[8];
+2502c2534
+<   v[217]=297.0;
+---
+>   v[217]=px[2];
+2557,2558c2589,2590
+<   v[272]=585.0;
+<   v[273]=191.0;
+---
+>   v[272]=py[3];
+>   v[273]=px[9];
+2560c2592
+<   v[275]=645.0;
+---
+>   v[275]=py[9];
+2577c2609
+<   v[292]=606.0;
+---
+>   v[292]=px[3];
+2632,2633c2664,2665
+<   v[347]=586.0;
+<   v[348]=-89.0;
+---
+>   v[347]=py[4];
+>   v[348]=px[10];
+2635c2667
+<   v[350]=593.0;
+---
+>   v[350]=py[10];
+2652c2684
+<   v[367]=316.0;
+---
+>   v[367]=px[4];
+2707,2708c2739,2740
+<   v[422]=160.0;
+<   v[423]=-462.0;
+---
+>   v[422]=py[5];
+>   v[423]=px[11];
+2710c2742
+<   v[425]=208.0;
+---
+>   v[425]=py[11];
+2727c2759
+<   v[442]=-214.0;
+---
+>   v[442]=-px[5];

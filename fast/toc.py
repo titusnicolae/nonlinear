@@ -19,8 +19,13 @@ output="out.o"
 
 flog=open(logfile,"w")
 fout=open(output,"w")
+points=[]
 
+def pmin(a,b):
+  c=(a[0]-(b[0]/2.0),a[1]-(b[1]/2.0))
+  return c
 def readfile(filename):
+  global points
   f=open(filename,"r")
   p1,p2=[],[]
   l=[] 
@@ -32,7 +37,11 @@ def readfile(filename):
       l.append((x,y))
   s=l[0]
   p1=l[1:7]
-  p2=l[7:]
+  p2=l[7:] 
+  points=p1+p2
+  points=map(lambda x:pmin(x,s),points)
+  for i,p in enumerate(points):
+    print i,p
   return (p1,p2,s,f)
 
 def vecpic(l,s,f):
@@ -64,11 +73,11 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
   #else: Fcu=F
   
   if   v[0]=='a':
-    vd=[nonlinear.d3(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+    vd=[nonlinear.d3(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'],points)]
   elif v[0]=='b':
-    vd=[nonlinear.d4(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+    vd=[nonlinear.d4(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'],points)]
   elif v[0]=='g':
-    vd=[nonlinear.d5(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+    vd=[nonlinear.d5(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'],points)]
 #  vd=map(lambda x:parsedag(x,{},var),d)
 ##  print vd,vdq
   try:
@@ -82,7 +91,7 @@ def optmx2(F,d,var,v,vf,q=None,cu=None,stepup=None):
     for (x,y) in izip(v,p):
       var[x]-=y*step[v]
     #tvf=parsedag(Fcu,{},var)
-    tvf=nonlinear.delta(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])
+    tvf=nonlinear.delta(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'],points)
     if tvf>vf:
       for (x,y) in izip(v,tv):
         var[x]=y 
@@ -102,8 +111,9 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
 #  if cu!=None: Fcu=curry(F,cu)
  # else: Fcu=F
 #  vd=map(lambda x:parsedag(x,{},var),d)
-  vd=[nonlinear.d1(var['a'],var['b'],var['g'],var['x'],var['y'],var['z']),
-            nonlinear.d2(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'])]
+  vd=[nonlinear.d1(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'],points),
+
+            nonlinear.d2(var['a'],var['b'],var['g'],var['x'],var['y'],var['z'],points)]
 
   sqrt=(reduce(lambda x,y:x+y,map(lambda (x,y):(x*y)**2,izip(vd,q))))**0.5
   p=map(lambda (x,y):x*y/sqrt,izip(vd,q))
@@ -114,16 +124,16 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
   dr=step[v]*10.0
   for (x,y) in izip(v,p): td[x]=var[x]-y*st
   #vst=parsedag(Fcu,{},td)
-  vst=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+  vst=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'],points)
   for (x,y) in izip(v,p): td[x]=var[x]-y*dr
   #vdr=parsedag(Fcu,{},td)
-  vdr=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+  vdr=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'],points)
   dif=(dr-st)/10.0**5
   vmi=0
   while st+dif<dr:
     mi=(st+dr)/2.0
     for (x,y) in izip(v,p): td[x]=var[x]-y*mi
-    vmi=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'])
+    vmi=nonlinear.delta(td['a'],td['b'],td['g'],td['x'],td['y'],td['z'],points)
     if dbg: print "%e %e %e %e %e %e"%(st,mi,dr,vst,vmi,vdr)
     if vmi > vst and vmi > vdr:
       if vst<vdr:
@@ -153,7 +163,7 @@ def optmxbin(F,d,var,v,vf,q=None,cu=None,stepup=None):
 
 def randomize():
   var={}
-  var['x']=10000.0
+  var['x']=20000.0
   var['y']=random()*20000-10000 
   var['z']=random()*20000-10000 
   var['a']=random()*3.14-1.57
@@ -283,7 +293,7 @@ def term(i):
   return "v["+str(i)+"]"
 
 if __name__=="__main__":
-  (p1,p2,s,f)=readfile("synthetic1.in")
+  (p1,p2,s,f)=readfile("dom00-09.in")
   vecpic(p1,s,f)  
   (v1,v2)=map(lambda x:vecpic(x,s,f),[p1,p2])
   (F,dl,deltaList)=system(v1,v2) 
@@ -317,7 +327,7 @@ if __name__=="__main__":
   """ 
       
   #for i in xrange(1000):
-  #  parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
+#  parsedag(dl[3],{},{'a':1.0,'b':1.0,'g':1.0,'x':1.0,'y':1.0,'z':1.0})
 
   minimize(F,dl,deltaList)
   minimize([],[],[])
